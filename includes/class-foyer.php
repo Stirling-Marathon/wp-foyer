@@ -51,6 +51,9 @@ class Foyer {
 		/* Foyer_Setup */
 		add_action( 'init', array( 'Foyer_Setup', 'register_post_types' ), 5 );
 
+		/* Foyer_Roku_REST_API */
+		add_action( 'rest_api_init', array( 'Foyer_Roku_REST_API', 'register_routes' ) );
+
 		/* Foyer_Slide_Backgrounds */
 		add_filter( 'foyer/slides/backgrounds', array( 'Foyer_Slide_Backgrounds', 'add_default_slide_background' ), 5 );
 		add_filter( 'foyer/slides/backgrounds', array( 'Foyer_Slide_Backgrounds', 'add_image_slide_background' ), 5 );
@@ -135,6 +138,9 @@ class Foyer {
 
 		/* Settings. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-settings.php';
+
+		/* Roku REST API. */
+		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-roku-rest-api.php';
 
 		/* Setup of internationalization. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-i18n.php';
