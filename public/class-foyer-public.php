@@ -108,6 +108,7 @@ class Foyer_Public {
 		}
 
 		wp_enqueue_style( Foyer::get_plugin_name() );
+		wp_add_inline_style( Foyer::get_plugin_name(), self::get_transition_duration_css() );
 
 		/*
 		 * Runs after the Foyer public styles are enqueued.
@@ -145,6 +146,7 @@ class Foyer_Public {
 		 */
 		do_action( 'foyer/public/enqueue_scripts/before' );
 
+		wp_localize_script( Foyer::get_plugin_name(), 'foyer_public_settings', self::get_public_script_settings() );
 		wp_enqueue_script( Foyer::get_plugin_name() );
 
 		/*
@@ -164,5 +166,49 @@ class Foyer_Public {
 	private static function load_dependencies() {
 		require_once FOYER_PLUGIN_PATH . 'public/class-foyer-templates.php';
 
+	}
+
+	/**
+	 * Returns settings exposed to the browser player.
+	 *
+	 * @return array
+	 */
+	private static function get_public_script_settings() {
+		return array(
+			'transition_duration_seconds' => Foyer_Settings::get( 'transition_duration_seconds' ),
+			'content_refresh_seconds' => Foyer_Settings::get( 'content_refresh_seconds' ),
+			'forced_reload_seconds' => Foyer_Settings::get( 'forced_reload_seconds' ),
+		);
+	}
+
+	/**
+	 * Returns inline CSS for configurable transition duration.
+	 *
+	 * @return string
+	 */
+	private static function get_transition_duration_css() {
+		$duration = self::format_css_seconds( Foyer_Settings::get( 'transition_duration_seconds' ) );
+
+		return sprintf(
+			'.foyer-transition-fade .foyer-slides .foyer-slide{-webkit-transition:opacity %1$ss ease,left 0s ease %1$ss;transition:opacity %1$ss ease,left 0s ease %1$ss;}.foyer-transition-fade .foyer-slides .foyer-slide.active{-webkit-transition:left 0s,opacity %1$ss ease;transition:left 0s,opacity %1$ss ease;}.foyer-transition-slide .foyer-slides .foyer-slide{-webkit-transition:left %1$ss ease,opacity 0s ease %1$ss;transition:left %1$ss ease,opacity 0s ease %1$ss;}.foyer-transition-slide .foyer-slides .foyer-slide.active{-webkit-transition:opacity 0s,left %1$ss ease;transition:opacity 0s,left %1$ss ease;}',
+			$duration
+		);
+	}
+
+	/**
+	 * Formats a numeric duration for CSS output.
+	 *
+	 * @param float $seconds Duration in seconds.
+	 * @return string
+	 */
+	private static function format_css_seconds( $seconds ) {
+		$seconds = floatval( $seconds );
+		$formatted = rtrim( rtrim( number_format( $seconds, 3, '.', '' ), '0' ), '.' );
+
+		if ( '' === $formatted ) {
+			return '0';
+		}
+
+		return $formatted;
 	}
 }

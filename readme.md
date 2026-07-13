@@ -1,3 +1,9 @@
+# Stirling Foyer
+
+This is Stirling Marathon Limited's internal fork of Foyer. It preserves Foyer's existing post types, metadata, text domain, and browser display behaviour while adding Stirling-specific operational settings.
+
+The upstream project remains Foyer for WordPress by Menno Luitjes. See `UPSTREAM.md` for the reviewed upstream baseline and sync procedure.
+
 # Foyer for WordPress
 
 A free Digital Signage / Narrowcasting plugin for WordPress.

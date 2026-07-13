@@ -133,6 +133,9 @@ class Foyer {
 		/* Database updater. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-updater.php';
 
+		/* Settings. */
+		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-settings.php';
+
 		/* Setup of internationalization. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-i18n.php';
 

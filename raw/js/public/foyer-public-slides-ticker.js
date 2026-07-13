@@ -2,7 +2,7 @@ var foyer_ticker_shutdown_status = false;
 var foyer_ticker_shutdown_callback;
 var foyer_ticker_shutdown_callback_options;
 
-var foyer_ticker_css_transition_duration = 1.5; // 1.5 seconds
+var foyer_ticker_css_transition_duration = foyer_public_setting('transition_duration_seconds', 1.5); // seconds
 var foyer_ticker_css_transition_duration_safe = foyer_ticker_css_transition_duration + 0.5; // add 0.5 seconds
 
 jQuery(document).ready(function() {

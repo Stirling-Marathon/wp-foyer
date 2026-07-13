@@ -26,6 +26,8 @@ class Foyer_Admin {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_scripts' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'admin_menu' ) );
+		add_action( 'admin_menu', array( 'Foyer_Admin_Settings', 'add_settings_page' ) );
+		add_action( 'admin_init', array( 'Foyer_Admin_Settings', 'register_settings' ) );
 
 		/* Foyer_Admin_Display */
 		add_action( 'admin_enqueue_scripts', array( 'Foyer_Admin_Display', 'localize_scripts' ) );
@@ -133,6 +135,7 @@ class Foyer_Admin {
 		require_once FOYER_PLUGIN_PATH . 'admin/class-foyer-admin-channel.php';
 		require_once FOYER_PLUGIN_PATH . 'admin/class-foyer-admin-slide.php';
 		require_once FOYER_PLUGIN_PATH . 'admin/class-foyer-admin-preview.php';
+		require_once FOYER_PLUGIN_PATH . 'admin/class-foyer-admin-settings.php';
 
 		/**
 		 * Admin area functionality for specific slide backgrounds.

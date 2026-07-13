@@ -3,6 +3,18 @@ var foyer_channel_selector = '.foyer-channel';
 var foyer_slides_selector = '.foyer-slides';
 var foyer_slide_selector = '.foyer-slide';
 
+function foyer_public_setting(key, default_value) {
+	if (window.foyer_public_settings && typeof window.foyer_public_settings[key] !== 'undefined') {
+		var configured_value = parseFloat(window.foyer_public_settings[key]);
+
+		if (!isNaN(configured_value)) {
+			return configured_value;
+		}
+	}
+
+	return default_value;
+}
+
 jQuery(document).ready(function() {
 
 	if (jQuery(foyer_display_selector).length) {
@@ -25,10 +37,10 @@ function foyer_display_setup() {
 	jQuery(this).css('cursor','none');
 
 	// Smart to refresh the entire display at least a couple of times a day
-	major_refresh_timeout = setTimeout(foyer_display_reload_window, 8 * 60 * 60 * 1000); // (8 hours in milliseconds)
+	major_refresh_timeout = setTimeout(foyer_display_reload_window, foyer_public_setting('forced_reload_seconds', 8 * 60 * 60) * 1000); // (seconds in milliseconds)
 
 	// Load fresh display content every 5 minutes
-	foyer_loader_intervalObject = window.setInterval(foyer_display_load_data, 5 * 60 * 1000) // (5 minutes in milliseconds)
+	foyer_loader_intervalObject = window.setInterval(foyer_display_load_data, foyer_public_setting('content_refresh_seconds', 5 * 60) * 1000) // (seconds in milliseconds)
 }
 
 /**

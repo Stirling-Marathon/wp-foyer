@@ -13,14 +13,15 @@
  * @package           Foyer
  *
  * @wordpress-plugin
- * Plugin Name:       Foyer - Digital Signage for WordPress
- * Plugin URI:        https://mennoluitjes.nl
- * Description:       Create slideshows and show them off on your networked displays.
- * Version:           1.7.6
- * Author:            Menno Luitjes
+ * Plugin Name:       Stirling Foyer
+ * Plugin URI:        https://github.com/StirlingMarathonLimited/wp-foyer
+ * Description:       Stirling Marathon's internal digital signage fork of Foyer.
+ * Version:           1.8.0-stirling.1
+ * Author:            Menno Luitjes and Stirling Marathon Limited
  * Author URI:        https://mennoluitjes.nl
  * License:           GPL-3.0+
  * License URI:       https://www.gnu.org/licenses/gpl.html
+ * Update URI:        https://github.com/StirlingMarathonLimited/wp-foyer
  * Text Domain:       foyer
  * Domain Path:       /languages
  */
@@ -65,7 +66,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-foyer.php';
  */
 function run_foyer() {
 
-	define( 'FOYER_PLUGIN_VERSION', '1.7.6' ); // do not access directly
+	define( 'FOYER_PLUGIN_VERSION', '1.8.0-stirling.1' ); // do not access directly
 	define( 'FOYER_PLUGIN_NAME', 'foyer' ); // do not access directly
 	define( 'FOYER_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 	define( 'FOYER_PLUGIN_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
