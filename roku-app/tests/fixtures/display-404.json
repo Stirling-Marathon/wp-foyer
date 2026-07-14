@@ -1,0 +1,5 @@
+{
+  "code": "rest_post_invalid_id",
+  "message": "Invalid display.",
+  "data": { "status": 404 }
+}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="MainScene" extends="Scene">
+  <children>
+    <DisplaySelector id="selector" visible="false" />
+    <SignagePlayer id="player" visible="false" />
+    <Group id="menuOverlay" visible="false">
+      <Rectangle width="1920" height="1080" color="#000000" opacity="0.62" />
+      <Rectangle translation="[610,260]" width="700" height="500" color="#111827" opacity="0.96" />
+      <Label id="menuTitle" translation="[660,310]" width="600" height="50" text="WordPress Foyer" font="font:LargeBoldSystemFont" color="#f8fafc" />
+      <Label id="menuSubtitle" translation="[660,370]" width="600" height="44" font="font:MediumSystemFont" color="#cbd5e1" />
+      <LabelList id="menuList" translation="[660,445]" itemSize="[560,58]" numRows="5" />
+    </Group>
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/AppConfig.generated.brs" />
+  <script type="text/brightscript" uri="pkg:/components/AppConfig.brs" />
+  <script type="text/brightscript" uri="pkg:/components/RokuUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/components/Registry.brs" />
+  <script type="text/brightscript" uri="pkg:/components/MainScene.brs" />
+</component>

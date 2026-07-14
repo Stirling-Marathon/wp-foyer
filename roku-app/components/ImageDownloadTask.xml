@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="ImageDownloadTask" extends="Task">
+  <interface>
+    <field id="slides" type="array" />
+    <field id="result" type="assocarray" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/AppConfig.generated.brs" />
+  <script type="text/brightscript" uri="pkg:/components/AppConfig.brs" />
+  <script type="text/brightscript" uri="pkg:/components/RokuUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/components/ImageDownloadTask.brs" />
+</component>

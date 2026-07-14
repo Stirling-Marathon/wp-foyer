@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "display": { "id": 42, "slug": "long-list", "name": "Long List" },
+  "channel": { "durationSeconds": 8, "transition": "fade", "transitionDurationSeconds": 3 },
+  "slides": [
+    { "id": 1, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/1.png", "revision": "r1", "durationSeconds": 8 },
+    { "id": 2, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/2.png", "revision": "r2", "durationSeconds": 8 },
+    { "id": 3, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/3.png", "revision": "r3", "durationSeconds": 8 },
+    { "id": 4, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/4.png", "revision": "r4", "durationSeconds": 8 },
+    { "id": 5, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/5.png", "revision": "r5", "durationSeconds": 8 }
+  ],
+  "revision": "long"
+}

@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "display": { "id": 99, "slug": "empty", "name": "Empty" },
+  "channel": { "durationSeconds": 8 },
+  "slides": [],
+  "revision": "empty"
+}

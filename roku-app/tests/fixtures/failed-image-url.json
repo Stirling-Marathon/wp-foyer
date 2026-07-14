@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "display": { "id": 99, "slug": "bad-image", "name": "Bad Image" },
+  "channel": { "durationSeconds": 8 },
+  "slides": [
+    { "id": 1, "type": "image", "sourceType": "foyer-image", "url": "file:///etc/passwd", "revision": "x", "durationSeconds": 8 }
+  ],
+  "revision": "bad-image"
+}

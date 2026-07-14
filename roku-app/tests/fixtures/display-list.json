@@ -1,0 +1,9 @@
+{
+  "displays": [
+    { "id": 25, "slug": "epic-room-roku", "name": "Epic Room (Roku)" },
+    { "id": 16, "slug": "factory-office", "name": "Factory Office" },
+    { "id": 10, "slug": "lobby", "name": "Lobby" },
+    { "id": 6, "slug": "boardroom", "name": "Main Boardroom" },
+    { "id": 11, "slug": "office-upstairs", "name": "Office Upstairs" }
+  ]
+}

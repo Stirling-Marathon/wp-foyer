@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "display": { "id": 99, "slug": "mixed", "name": "Mixed" },
+  "channel": { "durationSeconds": 8 },
+  "slides": [
+    { "id": 1, "type": "unsupported", "sourceType": "foyer-iframe", "url": "http://example.test", "revision": "x", "durationSeconds": 8 },
+    { "id": 2, "type": "image", "sourceType": "foyer-image", "url": "http://example.test/two.png", "revision": "y", "durationSeconds": 8 }
+  ],
+  "revision": "mixed"
+}

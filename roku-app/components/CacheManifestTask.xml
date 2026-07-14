@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="CacheManifestTask" extends="Task">
+  <interface>
+    <field id="mode" type="string" />
+    <field id="displaySlug" type="string" />
+    <field id="manifest" type="assocarray" />
+    <field id="result" type="assocarray" />
+  </interface>
+  <script type="text/brightscript" uri="pkg:/source/AppConfig.generated.brs" />
+  <script type="text/brightscript" uri="pkg:/components/AppConfig.brs" />
+  <script type="text/brightscript" uri="pkg:/components/RokuUtils.brs" />
+  <script type="text/brightscript" uri="pkg:/components/ManifestNormalizer.brs" />
+  <script type="text/brightscript" uri="pkg:/components/CacheManifestTask.brs" />
+</component>

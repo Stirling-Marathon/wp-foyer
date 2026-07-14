@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-14T15:08:43Z",
+  "refreshSeconds": 60,
+  "display": { "id": 16, "slug": "factory-office", "name": "Factory Office" },
+  "channel": { "id": 7, "name": "Factory Related", "durationSeconds": 8, "transition": "fade", "transitionDurationSeconds": 3 },
+  "slides": [
+    { "id": 15, "type": "image", "sourceType": "foyer-iframe-snapshot", "url": "http://example.internal/wp-content/uploads/foyer-roku/slide-15.png", "fit": "cover", "revision": "58ccf629", "durationSeconds": 8 }
+  ],
+  "warnings": [],
+  "revision": "factory-revision"
+}

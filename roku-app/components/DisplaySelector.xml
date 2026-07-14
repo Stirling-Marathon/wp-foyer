@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component name="DisplaySelector" extends="Group">
+  <interface>
+    <field id="displays" type="array" onChange="OnDisplaysChanged" />
+    <field id="statusText" type="string" onChange="OnStatusChanged" />
+    <field id="selectedDisplay" type="assocarray" alwaysNotify="true" />
+    <field id="retryRequested" type="boolean" alwaysNotify="true" />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#08111f" />
+    <Label id="title" text="WordPress Foyer" translation="[120,90]" width="1680" height="70" font="font:LargeBoldSystemFont" color="#f8fafc" />
+    <Label id="subtitle" text="Choose this TV's display" translation="[120,165]" width="1680" height="44" font="font:MediumSystemFont" color="#cbd5e1" />
+    <LabelList id="displayList" translation="[120,250]" itemSize="[1200,70]" numRows="8" vertFocusAnimationStyle="floatingFocus" />
+    <Label id="status" translation="[120,900]" width="1500" height="40" font="font:MediumSystemFont" color="#94a3b8" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/components/DisplaySelector.brs" />
+</component>
