@@ -31,9 +31,8 @@ WordPress administration:
 
 Example Foyer display:
 
-- `http://of-k9/display/foyer/office-upstairs/`
+- `http://of-k9.stirling/display/foyer/office-upstairs/`
 
-Important: the two URLs use different hostnames (`of-k9.stirling` and `of-k9`). Do not normalize or change these without first checking WordPress `home`/`siteurl`, Apache virtual hosts, DNS, and existing TV access. The Roku feed should return URLs resolvable by the Roku TVs.
 
 Displays:
 
@@ -281,7 +280,7 @@ Example:
       "id": 789,
       "type": "image",
       "sourceType": "foyer-image",
-      "url": "http://of-k9/display/wp-content/uploads/example.jpg",
+      "url": "http://of-k9.stirling/display/wp-content/uploads/example.jpg",
       "durationSeconds": 8,
       "fit": "cover",
       "revision": "stable-cache-buster"
@@ -463,7 +462,7 @@ The base API URL may be:
 Initial expected base:
 
 ```text
-http://of-k9/display/wp-json/stirling-foyer/v1
+http://of-k9.stirling/display/wp-json/stirling-foyer/v1
 ```
 
 Verify hostname resolution from the Roku VLAN/network before relying on `of-k9`. If necessary, use the resolvable internal FQDN consistently.
@@ -518,7 +517,7 @@ At minimum:
 - Back up the WordPress database.
 - Confirm the fork preserves existing CPT names and metadata.
 - Test the example display:
-  - `http://of-k9/display/foyer/office-upstairs/`
+  - `http://of-k9.stirling/display/foyer/office-upstairs/`
 - Confirm Samsung browser playback before deploying Roku features.
 - Disable page caching for `/display/foyer/*` and the manifest endpoints if a cache is later introduced.
 
