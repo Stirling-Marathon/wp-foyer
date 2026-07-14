@@ -57,6 +57,9 @@ class Foyer_Admin_Settings {
 		self::add_field( 'webpage_snapshot_refresh_seconds', __( 'Webpage snapshot refresh interval', 'foyer' ), 'foyer_settings_roku', '1' );
 		self::add_field( 'webpage_snapshot_width', __( 'Webpage snapshot width', 'foyer' ), 'foyer_settings_roku', '1', __( 'pixels', 'foyer' ) );
 		self::add_field( 'webpage_snapshot_height', __( 'Webpage snapshot height', 'foyer' ), 'foyer_settings_roku', '1', __( 'pixels', 'foyer' ) );
+		self::add_field( 'webpage_snapshot_timeout_seconds', __( 'Webpage snapshot timeout', 'foyer' ), 'foyer_settings_roku', '1' );
+		self::add_field( 'webpage_snapshot_settle_seconds', __( 'Webpage snapshot settle delay', 'foyer' ), 'foyer_settings_roku', '0.1' );
+		self::add_textarea_field( 'webpage_snapshot_allowed_hosts', __( 'Webpage snapshot allowed hosts', 'foyer' ), 'foyer_settings_roku' );
 	}
 
 	/**
@@ -83,6 +86,27 @@ class Foyer_Admin_Settings {
 				'key' => $key,
 				'step' => $step,
 				'unit' => $unit,
+			)
+		);
+	}
+
+	/**
+	 * Adds a textarea settings field.
+	 *
+	 * @param string $key The setting key.
+	 * @param string $label The field label.
+	 * @param string $section The settings section.
+	 * @return void
+	 */
+	private static function add_textarea_field( $key, $label, $section ) {
+		add_settings_field(
+			$key,
+			$label,
+			array( __CLASS__, 'render_hosts_field' ),
+			'foyer-settings',
+			$section,
+			array(
+				'key' => $key,
 			)
 		);
 	}
@@ -128,6 +152,28 @@ class Foyer_Admin_Settings {
 
 		echo ' ';
 		echo esc_html( $args['unit'] );
+	}
+
+	/**
+	 * Renders the allowed-hosts textarea.
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 */
+	static function render_hosts_field( $args ) {
+		$key = $args['key'];
+		$value = Foyer_Settings::get( $key );
+
+		if ( is_array( $value ) ) {
+			$value = implode( "\n", $value );
+		}
+
+		printf(
+			'<textarea name="%1$s[%2$s]" id="%2$s" rows="5" cols="40" class="large-text code">%3$s</textarea>',
+			esc_attr( Foyer_Settings::option_name ),
+			esc_attr( $key ),
+			esc_textarea( $value )
+		);
 	}
 
 	/**

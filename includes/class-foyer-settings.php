@@ -24,6 +24,12 @@ class Foyer_Settings {
 			'webpage_snapshot_refresh_seconds' => 120,
 			'webpage_snapshot_width' => 1920,
 			'webpage_snapshot_height' => 1080,
+			'webpage_snapshot_timeout_seconds' => 30,
+			'webpage_snapshot_settle_seconds' => 2,
+			'webpage_snapshot_allowed_hosts' => array(
+				'of-k9',
+				'of-k9.stirling',
+			),
 		);
 	}
 
@@ -68,6 +74,19 @@ class Foyer_Settings {
 				'type' => 'int',
 				'min' => 240,
 				'max' => 4320,
+			),
+			'webpage_snapshot_timeout_seconds' => array(
+				'type' => 'int',
+				'min' => 5,
+				'max' => 120,
+			),
+			'webpage_snapshot_settle_seconds' => array(
+				'type' => 'float',
+				'min' => 0,
+				'max' => 30,
+			),
+			'webpage_snapshot_allowed_hosts' => array(
+				'type' => 'hosts',
 			),
 		);
 	}
@@ -118,6 +137,11 @@ class Foyer_Settings {
 			$value = isset( $input[ $key ] ) ? $input[ $key ] : $default;
 			$rules = $schema[ $key ];
 
+			if ( 'hosts' === $rules['type'] ) {
+				$output[ $key ] = self::sanitize_hosts( $value );
+				continue;
+			}
+
 			if ( 'float' === $rules['type'] ) {
 				$value = floatval( $value );
 			} else {
@@ -136,5 +160,37 @@ class Foyer_Settings {
 		}
 
 		return $output;
+	}
+
+	/**
+	 * Sanitizes an allowed-host list.
+	 *
+	 * @param array|string $input Host list.
+	 * @return array
+	 */
+	private static function sanitize_hosts( $input ) {
+		if ( is_string( $input ) ) {
+			$input = preg_split( '/[\r\n,]+/', $input );
+		}
+
+		if ( ! is_array( $input ) ) {
+			$input = array();
+		}
+
+		$hosts = array();
+
+		foreach ( $input as $host ) {
+			$host = Foyer_Roku_Snapshots::normalize_host( $host );
+
+			if ( is_wp_error( $host ) ) {
+				continue;
+			}
+
+			$hosts[] = $host;
+		}
+
+		$hosts = array_values( array_unique( $hosts ) );
+
+		return $hosts;
 	}
 }

@@ -1,0 +1,14 @@
+[Unit]
+Description=Refresh Stirling Foyer Roku webpage snapshots
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/display/wp-content/plugins/wp-foyer
+ExecStart=/usr/local/bin/wp --path=/var/www/html/display foyer roku-snapshots refresh --node=/usr/bin/node --worker=/var/www/html/display/wp-content/plugins/wp-foyer/bin/foyer-roku-snapshot-worker.js
+NoNewPrivileges=true
+PrivateTmp=true
+

@@ -2,6 +2,13 @@
 
 Internal changes for the Stirling Marathon Limited fork of Foyer.
 
+## 1.8.0-stirling.3
+
+- Add WP-CLI-driven external webpage snapshot generation for Roku manifests.
+- Add Playwright-based snapshot worker and example systemd timer files.
+- Return successful iframe snapshots as Roku-compatible image records in display manifests.
+- Add snapshot URL validation, allowed-host settings, and snapshot metadata handling.
+
 ## 1.8.0-stirling.2
 
 - Add read-only Roku REST API endpoints for published Foyer displays and display manifests.

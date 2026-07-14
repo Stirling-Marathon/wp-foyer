@@ -136,11 +136,17 @@ class Foyer {
 		/* Database updater. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-updater.php';
 
+		/* Roku snapshots. */
+		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-roku-snapshots.php';
+
 		/* Settings. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-settings.php';
 
 		/* Roku REST API. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-roku-rest-api.php';
+
+		/* Roku snapshot WP-CLI command. */
+		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-roku-snapshots-cli.php';
 
 		/* Setup of internationalization. */
 		require_once FOYER_PLUGIN_PATH . 'includes/class-foyer-i18n.php';

@@ -117,21 +117,9 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 	}
 
 	function test_iframe_slides_return_unsupported_record_and_warning() {
-		$slide_id = $this->factory->post->create( array(
-			'post_type' => Foyer_Slide::post_type_name,
-			'post_status' => 'publish',
-		) );
-		add_post_meta( $slide_id, 'slide_format', 'iframe' );
-		add_post_meta( $slide_id, 'slide_iframe_website_url', 'http://of-k9/example-dashboard' );
-
+		$slide_id = $this->create_iframe_slide();
 		$channel_id = $this->create_channel( 'Web Channel', array( $slide_id ) );
-		$display_id = $this->factory->post->create( array(
-			'post_type' => Foyer_Display::post_type_name,
-			'post_title' => 'Web Display',
-			'post_name' => 'web-display',
-			'post_status' => 'publish',
-		) );
-		add_post_meta( $display_id, Foyer_Channel::post_type_name, $channel_id );
+		$display_id = $this->create_display( 'Web Display', 'web-display', $channel_id );
 
 		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
 
@@ -140,7 +128,54 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		$this->assertEquals( 'foyer-iframe', $manifest['slides'][0]['sourceType'] );
 		$this->assertCount( 1, $manifest['warnings'] );
 		$this->assertEquals( $slide_id, $manifest['warnings'][0]['slideId'] );
-		$this->assertEquals( 'unsupported_slide_type', $manifest['warnings'][0]['code'] );
+		$this->assertEquals( 'snapshot_not_available', $manifest['warnings'][0]['code'] );
+	}
+
+	function test_iframe_slides_with_successful_snapshot_return_snapshot_image() {
+		$slide_id = $this->create_iframe_slide();
+		$channel_id = $this->create_channel( 'Web Channel', array( $slide_id ) );
+		$display_id = $this->create_display( 'Web Display', 'web-display', $channel_id );
+		$snapshot = $this->create_snapshot_for_slide( $slide_id, 'first image content' );
+
+		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertCount( 1, $manifest['slides'] );
+		$this->assertEquals( 'image', $manifest['slides'][0]['type'] );
+		$this->assertEquals( 'foyer-iframe-snapshot', $manifest['slides'][0]['sourceType'] );
+		$this->assertEquals( $snapshot['url'], $manifest['slides'][0]['url'] );
+		$this->assertEquals( $snapshot['revision'], $manifest['slides'][0]['revision'] );
+		$this->assertEmpty( $manifest['warnings'] );
+		$this->assertNotContains( $snapshot['path'], wp_json_encode( $manifest ) );
+	}
+
+	function test_manifest_revision_changes_when_snapshot_revision_changes() {
+		$slide_id = $this->create_iframe_slide();
+		$channel_id = $this->create_channel( 'Web Channel', array( $slide_id ) );
+		$display_id = $this->create_display( 'Web Display', 'web-display', $channel_id );
+
+		$this->create_snapshot_for_slide( $slide_id, 'first image content' );
+		$first_manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->create_snapshot_for_slide( $slide_id, 'second image content' );
+		$second_manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertNotEquals( $first_manifest['slides'][0]['revision'], $second_manifest['slides'][0]['revision'] );
+		$this->assertNotEquals( $first_manifest['revision'], $second_manifest['revision'] );
+	}
+
+	function test_invalid_snapshot_metadata_does_not_break_manifest() {
+		$slide_id = $this->create_iframe_slide();
+		$channel_id = $this->create_channel( 'Web Channel', array( $slide_id ) );
+		$display_id = $this->create_display( 'Web Display', 'web-display', $channel_id );
+
+		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_path, '/not/a/real/snapshot.png' );
+		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_url, 'http://of-k9/display/wp-content/uploads/foyer-roku/slide-' . $slide_id . '.png' );
+		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_revision, 'bad-revision' );
+
+		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertEquals( 'unsupported', $manifest['slides'][0]['type'] );
+		$this->assertEquals( 'snapshot_not_available', $manifest['warnings'][0]['code'] );
 	}
 
 	function test_unpublished_slides_are_not_included_in_manifest() {
@@ -173,6 +208,18 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		return $channel_id;
 	}
 
+	private function create_display( $title, $slug, $channel_id ) {
+		$display_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Display::post_type_name,
+			'post_title' => $title,
+			'post_name' => $slug,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $display_id, Foyer_Channel::post_type_name, $channel_id );
+
+		return $display_id;
+	}
+
 	private function create_image_slide( $post_status = 'publish' ) {
 		$attachment_id = $this->factory->post->create( array(
 			'post_type' => 'attachment',
@@ -191,5 +238,29 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		add_post_meta( $slide_id, 'slide_bg_image_image', $attachment_id );
 
 		return $slide_id;
+	}
+
+	private function create_iframe_slide() {
+		$slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $slide_id, 'slide_format', 'iframe' );
+		add_post_meta( $slide_id, 'slide_iframe_website_url', 'http://of-k9/example-dashboard' );
+
+		return $slide_id;
+	}
+
+	private function create_snapshot_for_slide( $slide_id, $contents ) {
+		$target = Foyer_Roku_Snapshots::get_snapshot_target( $slide_id );
+		file_put_contents( $target['path'], $contents );
+		$revision = Foyer_Roku_Snapshots::calculate_file_revision( $target['path'] );
+		Foyer_Roku_Snapshots::record_success( $slide_id, $target['path'], $target['url'], $revision );
+
+		return array(
+			'path' => $target['path'],
+			'url' => $target['url'],
+			'revision' => $revision,
+		);
 	}
 }

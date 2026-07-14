@@ -194,6 +194,19 @@ class Foyer_Roku_REST_API {
 		$background = $slide->get_background();
 
 		if ( 'iframe' === $format ) {
+			$snapshot = Foyer_Roku_Snapshots::get_successful_snapshot( $slide->ID );
+
+			if ( $snapshot ) {
+				return array(
+					'id' => intval( $slide->ID ),
+					'type' => 'image',
+					'sourceType' => 'foyer-iframe-snapshot',
+					'url' => $snapshot['url'],
+					'fit' => 'cover',
+					'revision' => $snapshot['revision'],
+				);
+			}
+
 			return array(
 				'id' => intval( $slide->ID ),
 				'type' => 'unsupported',
@@ -201,8 +214,8 @@ class Foyer_Roku_REST_API {
 				'revision' => self::generate_slide_revision( $slide ),
 				'warning' => array(
 					'slideId' => intval( $slide->ID ),
-					'code' => 'unsupported_slide_type',
-					'message' => __( 'Roku output is not available for external webpage slides until snapshots are implemented.', 'foyer' ),
+					'code' => 'snapshot_not_available',
+					'message' => __( 'No successful Roku snapshot is available for this external webpage slide.', 'foyer' ),
 				),
 			);
 		}

@@ -16,7 +16,7 @@
  * Plugin Name:       Stirling Foyer
  * Plugin URI:        https://github.com/StirlingMarathonLimited/wp-foyer
  * Description:       Stirling Marathon's internal digital signage fork of Foyer.
- * Version:           1.8.0-stirling.2
+ * Version:           1.8.0-stirling.3
  * Author:            Menno Luitjes and Stirling Marathon Limited
  * Author URI:        https://mennoluitjes.nl
  * License:           GPL-3.0+
@@ -66,7 +66,7 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-foyer.php';
  */
 function run_foyer() {
 
-	define( 'FOYER_PLUGIN_VERSION', '1.8.0-stirling.2' ); // do not access directly
+	define( 'FOYER_PLUGIN_VERSION', '1.8.0-stirling.3' ); // do not access directly
 	define( 'FOYER_PLUGIN_NAME', 'foyer' ); // do not access directly
 	define( 'FOYER_PLUGIN_PATH', plugin_dir_path( __FILE__ ) );
 	define( 'FOYER_PLUGIN_URL', trailingslashit( plugins_url( '', __FILE__ ) ) );
