@@ -6,7 +6,7 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 		parent::setUp();
 
 		update_option( Foyer_Settings::option_name, array(
-			'webpage_snapshot_allowed_hosts' => array( 'of-k9', 'of-k9.stirling' ),
+			'webpage_snapshot_allowed_hosts' => array( 'display-01', 'dashboards.example.internal' ),
 		) );
 	}
 
@@ -17,19 +17,19 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 	}
 
 	function test_validate_url_allows_http_and_https_for_allowed_hosts() {
-		$http = Foyer_Roku_Snapshots::validate_url( 'http://of-k9/display/dashboard' );
-		$https = Foyer_Roku_Snapshots::validate_url( 'https://of-k9.stirling/display/dashboard' );
+		$http = Foyer_Roku_Snapshots::validate_url( 'http://display-01/display/dashboard' );
+		$https = Foyer_Roku_Snapshots::validate_url( 'https://dashboards.example.internal/display/dashboard' );
 
 		$this->assertFalse( is_wp_error( $http ) );
 		$this->assertFalse( is_wp_error( $https ) );
-		$this->assertEquals( 'of-k9', $http['host'] );
-		$this->assertEquals( 'of-k9.stirling', $https['host'] );
+		$this->assertEquals( 'display-01', $http['host'] );
+		$this->assertEquals( 'dashboards.example.internal', $https['host'] );
 	}
 
 	function test_validate_url_rejects_unsafe_schemes_and_credentials() {
 		$schemes = array(
 			'file:///etc/passwd',
-			'ftp://of-k9/example',
+			'ftp://display-01/example',
 			'data:text/html,hello',
 			'javascript:alert(1)',
 			'chrome://version',
@@ -40,7 +40,7 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 			$this->assertWPError( Foyer_Roku_Snapshots::validate_url( $url ) );
 		}
 
-		$this->assertWPError( Foyer_Roku_Snapshots::validate_url( 'http://user:pass@of-k9/display' ) );
+		$this->assertWPError( Foyer_Roku_Snapshots::validate_url( 'http://user:pass@display-01/display' ) );
 	}
 
 	function test_validate_url_rejects_hosts_outside_allowlist() {
@@ -51,7 +51,7 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 	}
 
 	function test_normalize_host_rejects_malformed_hosts_and_ip_literals() {
-		$this->assertEquals( 'of-k9', Foyer_Roku_Snapshots::normalize_host( 'OF-K9.' ) );
+		$this->assertEquals( 'display-01', Foyer_Roku_Snapshots::normalize_host( 'DISPLAY-01.' ) );
 		$this->assertWPError( Foyer_Roku_Snapshots::normalize_host( 'bad/host' ) );
 		$this->assertWPError( Foyer_Roku_Snapshots::normalize_host( '127.0.0.1' ) );
 	}

@@ -26,10 +26,7 @@ class Foyer_Settings {
 			'webpage_snapshot_height' => 1080,
 			'webpage_snapshot_timeout_seconds' => 30,
 			'webpage_snapshot_settle_seconds' => 2,
-			'webpage_snapshot_allowed_hosts' => array(
-				'of-k9',
-				'of-k9.stirling',
-			),
+			'webpage_snapshot_allowed_hosts' => array(),
 		);
 	}
 

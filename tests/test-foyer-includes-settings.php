@@ -14,7 +14,7 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 		$this->assertEquals( 1080, $defaults['webpage_snapshot_height'] );
 		$this->assertEquals( 30, $defaults['webpage_snapshot_timeout_seconds'] );
 		$this->assertEquals( 2, $defaults['webpage_snapshot_settle_seconds'] );
-		$this->assertContains( 'of-k9', $defaults['webpage_snapshot_allowed_hosts'] );
+		$this->assertEquals( array(), $defaults['webpage_snapshot_allowed_hosts'] );
 	}
 
 	function test_sanitize_uses_defaults_for_missing_values() {
@@ -53,10 +53,10 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 
 	function test_sanitize_normalizes_allowed_hosts() {
 		$settings = Foyer_Settings::sanitize( array(
-			'webpage_snapshot_allowed_hosts' => "OF-K9\nhttp://of-k9.stirling/display\nfile://bad\n192.168.1.1\nbad/host",
+			'webpage_snapshot_allowed_hosts' => "DISPLAY-01\nhttp://dashboards.example.internal/display\nfile://bad\n203.0.113.10\nbad/host",
 		) );
 
-		$this->assertEquals( array( 'of-k9', 'of-k9.stirling' ), $settings['webpage_snapshot_allowed_hosts'] );
+		$this->assertEquals( array( 'display-01', 'dashboards.example.internal' ), $settings['webpage_snapshot_allowed_hosts'] );
 	}
 
 	function test_get_returns_sanitized_stored_setting() {

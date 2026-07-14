@@ -24,7 +24,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 
 	function filter_image_downsize( $downsize, $id, $size ) {
 		if ( in_array( $id, $this->image_downsize_attachment_ids ) && 'foyer' === $size ) {
-			return array( 'http://of-k9/display/wp-content/uploads/foyer-test.jpg', 1920, 1080, false );
+			return array( 'http://example.internal/wp-content/uploads/foyer-test.jpg', 1920, 1080, false );
 		}
 
 		return $downsize;
@@ -87,7 +87,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		$this->assertEquals( $slide_1_id, $manifest['slides'][1]['id'] );
 		$this->assertEquals( 'image', $manifest['slides'][0]['type'] );
 		$this->assertEquals( 'foyer-image', $manifest['slides'][0]['sourceType'] );
-		$this->assertEquals( 'http://of-k9/display/wp-content/uploads/foyer-test.jpg', $manifest['slides'][0]['url'] );
+		$this->assertEquals( 'http://example.internal/wp-content/uploads/foyer-test.jpg', $manifest['slides'][0]['url'] );
 		$this->assertEquals( 12, $manifest['slides'][0]['durationSeconds'] );
 		$this->assertArrayHasKey( 'revision', $manifest );
 	}
@@ -169,7 +169,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		$display_id = $this->create_display( 'Web Display', 'web-display', $channel_id );
 
 		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_path, '/not/a/real/snapshot.png' );
-		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_url, 'http://of-k9/display/wp-content/uploads/foyer-roku/slide-' . $slide_id . '.png' );
+		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_url, 'http://example.internal/wp-content/uploads/foyer-roku/slide-' . $slide_id . '.png' );
 		update_post_meta( $slide_id, Foyer_Roku_Snapshots::meta_revision, 'bad-revision' );
 
 		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
@@ -225,7 +225,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 			'post_type' => 'attachment',
 			'post_status' => 'inherit',
 			'post_mime_type' => 'image/jpeg',
-			'guid' => 'http://of-k9/display/wp-content/uploads/foyer-test.jpg',
+			'guid' => 'http://example.internal/wp-content/uploads/foyer-test.jpg',
 		) );
 		$this->image_downsize_attachment_ids[] = $attachment_id;
 
@@ -246,7 +246,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 			'post_status' => 'publish',
 		) );
 		add_post_meta( $slide_id, 'slide_format', 'iframe' );
-		add_post_meta( $slide_id, 'slide_iframe_website_url', 'http://of-k9/example-dashboard' );
+		add_post_meta( $slide_id, 'slide_iframe_website_url', 'http://example.internal/example-dashboard' );
 
 		return $slide_id;
 	}
