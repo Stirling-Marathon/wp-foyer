@@ -32,6 +32,8 @@ The shared `Foyer_Channel::get_slides()` path filters out unpublished, future, a
 
 The Roku snapshot worker uses `Foyer_Channel::get_current_and_future_slides()` so future iframe slides can be rendered before they become visible. Expired iframe slides are skipped.
 
+The channel editor uses `Foyer_Channel::get_all_slides()` so all configured published slides remain visible and editable regardless of schedule. Future and expired slides are shown with an inactive overlay; admin add, remove, reorder, and count operations use this unfiltered configured list.
+
 ## Iframe snapshot allowlist
 
 When an iframe slide is saved with a valid `http` or `https` URL without credentials, the normalized hostname is added to the Roku snapshot allowed-host list if it is not already present.

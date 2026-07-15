@@ -19,6 +19,7 @@ sub RunLogicTests()
     AssertTrue(normalized.ok, "normal manifest accepted")
     AssertTrue(normalized.manifest.slides.Count() = 2, "slide count preserved")
     AssertTrue(normalized.manifest.slides[0].id = 101, "slide order preserved")
+    AssertTrue(normalized.manifest.channel.durationSeconds = 8, "channel duration preserved")
 
     bad = ParseJson(ReadAsciiFile("pkg:/tests/fixtures/failed-image-url.json"))
     badResult = NormalizeManifest(bad, "bad-image")

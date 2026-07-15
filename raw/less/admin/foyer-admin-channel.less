@@ -14,6 +14,8 @@ body.post-php.post-type-foyer_channel {
 
 	.foyer_slides_editor_slides_slide {
 		display: inline-block;
+		vertical-align: top;
+		width: 150px;
 		margin: 1em;
 		margin-left: 0;
 		cursor: move;
@@ -24,6 +26,7 @@ body.post-php.post-type-foyer_channel {
 			width: 108px;
 			height: 192px;
 			position: relative;
+			margin: 0 auto;
 
 
 			iframe {
@@ -69,6 +72,39 @@ body.post-php.post-type-foyer_channel {
 		.foyer_slides_editor_slides_slide_caption {
 			margin-top: 1em;
 			text-align: center;
+		}
+
+		.foyer_slides_editor_slides_slide_details {
+			margin: 0.75em 0 0;
+			font-size: 12px;
+			line-height: 1.35;
+			word-break: break-word;
+
+			> div {
+				margin-bottom: 0.65em;
+			}
+
+			dt {
+				font-weight: 600;
+			}
+
+			dt,
+			dd {
+				display: inline;
+				margin: 0;
+			}
+		}
+
+		&.foyer-slide-is-inactive {
+			.foyer_slides_editor_slides_slide_iframe_container:after {
+				content: '';
+				position: absolute;
+				top: 0; bottom: 0;
+				left: 0; right: 0;
+				z-index: 9;
+				background: rgba(80, 80, 80, 0.65);
+				pointer-events: none;
+			}
 		}
 
 		&.foyer-slide-is-stack {

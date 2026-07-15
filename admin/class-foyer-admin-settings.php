@@ -50,7 +50,6 @@ class Foyer_Admin_Settings {
 			'foyer-settings'
 		);
 
-		self::add_field( 'transition_duration_seconds', __( 'Transition duration', 'foyer' ), 'foyer_settings_browser', '0.1' );
 		self::add_field( 'content_refresh_seconds', __( 'Content refresh interval', 'foyer' ), 'foyer_settings_browser', '1' );
 		self::add_field( 'forced_reload_seconds', __( 'Forced reload interval', 'foyer' ), 'foyer_settings_browser', '1' );
 		self::add_field( 'roku_manifest_refresh_seconds', __( 'Roku manifest refresh interval', 'foyer' ), 'foyer_settings_roku', '1' );

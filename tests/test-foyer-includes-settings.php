@@ -5,7 +5,6 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 	function test_get_defaults_returns_phase_one_defaults() {
 		$defaults = Foyer_Settings::get_defaults();
 
-		$this->assertEquals( 1.5, $defaults['transition_duration_seconds'] );
 		$this->assertEquals( 300, $defaults['content_refresh_seconds'] );
 		$this->assertEquals( 28800, $defaults['forced_reload_seconds'] );
 		$this->assertEquals( 60, $defaults['roku_manifest_refresh_seconds'] );
@@ -22,14 +21,13 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 			'transition_duration_seconds' => '2.25',
 		) );
 
-		$this->assertEquals( 2.25, $settings['transition_duration_seconds'] );
+		$this->assertArrayNotHasKey( 'transition_duration_seconds', $settings );
 		$this->assertEquals( 300, $settings['content_refresh_seconds'] );
 		$this->assertEquals( 28800, $settings['forced_reload_seconds'] );
 	}
 
 	function test_sanitize_clamps_values_to_safe_ranges() {
 		$settings = Foyer_Settings::sanitize( array(
-			'transition_duration_seconds' => '99',
 			'content_refresh_seconds' => '1',
 			'forced_reload_seconds' => '1',
 			'roku_manifest_refresh_seconds' => '1',
@@ -40,7 +38,6 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 			'webpage_snapshot_settle_seconds' => '999',
 		) );
 
-		$this->assertEquals( 10, $settings['transition_duration_seconds'] );
 		$this->assertEquals( 30, $settings['content_refresh_seconds'] );
 		$this->assertEquals( 300, $settings['forced_reload_seconds'] );
 		$this->assertEquals( 10, $settings['roku_manifest_refresh_seconds'] );
@@ -65,7 +62,7 @@ class Test_Foyer_Includes_Settings extends Foyer_UnitTestCase {
 			'content_refresh_seconds' => '45',
 		) );
 
-		$this->assertEquals( 3.5, Foyer_Settings::get( 'transition_duration_seconds' ) );
+		$this->assertNull( Foyer_Settings::get( 'transition_duration_seconds' ) );
 		$this->assertEquals( 45, Foyer_Settings::get( 'content_refresh_seconds' ) );
 	}
 }

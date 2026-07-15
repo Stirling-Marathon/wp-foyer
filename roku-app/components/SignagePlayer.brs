@@ -191,7 +191,7 @@ sub ShowSlide(index as Integer, immediate as Boolean)
         m.transitionPending = false
         m.currentPoster.opacity = 1
         m.nextPoster.opacity = 0
-        ScheduleNextSlide(slide.durationSeconds)
+        ScheduleNextSlide()
     else
         m.nextIndex = index
         m.loadingNext = true
@@ -213,30 +213,26 @@ end sub
 sub TransitionToNext()
     if m.transitionPending then return
     if m.slides.Count() = 0 then return
-    slide = m.slides[m.nextIndex]
-    transitionDuration = slide.transitionDurationSeconds
 
-    if m.manifest.channel.transition = "none" or transitionDuration <= 0
+    if m.manifest.channel.transition = "none"
         SwapPosters()
     else
         m.transitionPending = true
-        m.fadeAnimation.duration = transitionDuration
         m.fadeIn.fieldToInterp = m.nextPoster.id + ".opacity"
         m.fadeOut.fieldToInterp = m.currentPoster.id + ".opacity"
         m.fadeAnimation.control = "start"
         return
     end if
 
-    ScheduleNextSlide(slide.durationSeconds)
+    ScheduleNextSlide()
 end sub
 
 sub OnFadeAnimationState()
     if m.fadeAnimation.state = "stopped" and m.transitionPending
         m.transitionPending = false
         if m.slides.Count() = 0 then return
-        slide = m.slides[m.nextIndex]
         SwapPosters()
-        ScheduleNextSlide(slide.durationSeconds)
+        ScheduleNextSlide()
     end if
 end sub
 
@@ -249,10 +245,10 @@ sub SwapPosters()
     m.currentIndex = m.nextIndex
 end sub
 
-sub ScheduleNextSlide(durationSeconds as Float)
+sub ScheduleNextSlide()
     m.slideTimer.control = "stop"
-    if m.paused or m.slides.Count() <= 1 then return
-    m.slideTimer.duration = durationSeconds
+    if m.paused or m.slides.Count() <= 1 or m.manifest = invalid then return
+    m.slideTimer.duration = m.manifest.channel.durationSeconds
     m.slideTimer.control = "start"
 end sub
 
@@ -324,7 +320,7 @@ sub TogglePause()
     if m.paused
         m.slideTimer.control = "stop"
     else if m.slides.Count() > 0
-        ScheduleNextSlide(m.slides[m.currentIndex].durationSeconds)
+        ScheduleNextSlide()
     end if
 end sub
 

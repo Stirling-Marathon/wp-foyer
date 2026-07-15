@@ -55,20 +55,18 @@ function NormalizeManifest(raw as Dynamic, expectedSlug as String) as Object
 
     channelDuration = config.defaultSlideDurationSeconds
     transition = "fade"
-    transitionDuration = 0.0
     channelName = ""
 
     if type(raw.channel) = "roAssociativeArray"
         channelDuration = ClampNumber(raw.channel.durationSeconds, config.defaultSlideDurationSeconds, config.minSlideDurationSeconds, 86400)
         transition = LCase(SafeString(raw.channel.transition, "fade"))
         if transition <> "fade" and transition <> "none" and transition <> "slide" then transition = "fade"
-        transitionDuration = ClampNumber(raw.channel.transitionDurationSeconds, 0, 0, channelDuration)
         channelName = SafeString(raw.channel.name, "")
     end if
 
     slides = []
     for each slide in raw.slides
-        normalized = NormalizeSlide(slide, channelDuration, transitionDuration)
+        normalized = NormalizeSlide(slide)
         if normalized <> invalid then slides.Push(normalized)
     end for
 
@@ -90,8 +88,7 @@ function NormalizeManifest(raw as Dynamic, expectedSlug as String) as Object
         channel: {
             name: channelName,
             durationSeconds: channelDuration,
-            transition: transition,
-            transitionDurationSeconds: transitionDuration
+            transition: transition
         },
         slides: slides
     }
@@ -101,7 +98,7 @@ function NormalizeManifest(raw as Dynamic, expectedSlug as String) as Object
     return result
 end function
 
-function NormalizeSlide(slide as Dynamic, channelDuration as Float, transitionDuration as Float) as Dynamic
+function NormalizeSlide(slide as Dynamic) as Dynamic
     if type(slide) <> "roAssociativeArray" then return invalid
     if SafeString(slide.type, "") <> "image" then return invalid
 
@@ -117,11 +114,6 @@ function NormalizeSlide(slide as Dynamic, channelDuration as Float, transitionDu
     idType = type(slide.id)
     if idType <> "roInt" and idType <> "Integer" and idType <> "roFloat" and idType <> "Float" then return invalid
 
-    duration = ClampNumber(slide.durationSeconds, channelDuration, 2, 86400)
-    effectiveTransition = transitionDuration
-    if effectiveTransition >= duration then effectiveTransition = duration - 0.1
-    if effectiveTransition < 0 then effectiveTransition = 0
-
     fit = LCase(SafeString(slide.fit, "cover"))
     if fit <> "contain" and fit <> "cover" then fit = "cover"
 
@@ -132,8 +124,6 @@ function NormalizeSlide(slide as Dynamic, channelDuration as Float, transitionDu
         url: url,
         fit: fit,
         revision: revision,
-        durationSeconds: duration,
-        transitionDurationSeconds: effectiveTransition,
         cachePath: SlideCachePath({ id: Int(slide.id), revision: revision }, AppConfig().cacheDir)
     }
 end function

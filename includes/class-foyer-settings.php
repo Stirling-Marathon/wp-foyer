@@ -17,7 +17,6 @@ class Foyer_Settings {
 	 */
 	static function get_defaults() {
 		return array(
-			'transition_duration_seconds' => 1.5,
 			'content_refresh_seconds' => 300,
 			'forced_reload_seconds' => 28800,
 			'roku_manifest_refresh_seconds' => 60,
@@ -37,11 +36,6 @@ class Foyer_Settings {
 	 */
 	static function get_schema() {
 		return array(
-			'transition_duration_seconds' => array(
-				'type' => 'float',
-				'min' => 0,
-				'max' => 10,
-			),
 			'content_refresh_seconds' => array(
 				'type' => 'int',
 				'min' => 30,

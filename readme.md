@@ -129,7 +129,7 @@ curl http://example.internal/wp-json/foyer/v1/displays
 curl http://example.internal/wp-json/foyer/v1/displays/lobby
 ```
 
-The manifest returns only published displays, the active published channel, and currently eligible published slides. Image slides return Roku-compatible image records. Iframe slides return a snapshot image when one exists; otherwise the manifest includes a controlled warning and continues.
+The manifest returns only published displays, the active published channel, and currently eligible published slides. Slide timing comes from the active channel's Duration setting (8 seconds by default), and the channel's Transition setting controls the transition effect. Image slides return Roku-compatible image records. Iframe slides return a snapshot image when one exists; otherwise the manifest includes a controlled warning and continues.
 
 ## Snapshot Worker
 

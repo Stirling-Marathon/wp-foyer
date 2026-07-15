@@ -114,6 +114,25 @@ class Foyer_Channel {
 	}
 
 	/**
+	 * Get all published slides configured for this channel, regardless of schedule.
+	 *
+	 * Used by channel administration so future and expired slides remain editable.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @access	public
+	 * @return	array of Foyer_Slide	All published slides configured for this channel.
+	 */
+	public function get_all_slides() {
+
+		if ( ! isset( $this->slides['all'] ) ) {
+			$this->slides['all'] = $this->get_published_slides();
+		}
+
+		return $this->slides['all'];
+	}
+
+	/**
 	 * Get slides that are visible now or scheduled for the future.
 	 *
 	 * Used by the Roku snapshot worker to pre-generate upcoming iframe snapshots.
@@ -146,6 +165,33 @@ class Foyer_Channel {
 	 */
 	private function get_filtered_slides( $time = null, $include_future = false ) {
 		$slides = array();
+
+		foreach ( $this->get_all_slides() as $slide ) {
+
+			if ( $include_future ) {
+				if ( ! $slide->is_current_or_future_at( $time ) ) {
+					continue;
+				}
+			}
+			else if ( ! $slide->is_visible_at( $time ) ) {
+				continue;
+			}
+
+			$slides[] = $slide;
+		}
+
+		return $slides;
+	}
+
+	/**
+	 * Returns configured published slides without schedule filtering.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @return array
+	 */
+	private function get_published_slides() {
+		$slides = array();
 		$posts = get_post_meta( $this->ID, Foyer_Slide::post_type_name, true );
 
 		if ( empty( $posts ) ) {
@@ -160,16 +206,6 @@ class Foyer_Channel {
 			}
 
 			$slide = new Foyer_Slide( $post );
-
-			if ( $include_future ) {
-				if ( ! $slide->is_current_or_future_at( $time ) ) {
-					continue;
-				}
-			}
-			else if ( ! $slide->is_visible_at( $time ) ) {
-				continue;
-			}
-
 			$slides[] = $slide;
 		}
 

@@ -10,7 +10,6 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		$this->image_downsize_attachment_ids = array();
 		add_filter( 'image_downsize', array( $this, 'filter_image_downsize' ), 10, 3 );
 		update_option( Foyer_Settings::option_name, array(
-			'transition_duration_seconds' => 2.5,
 			'roku_manifest_refresh_seconds' => 90,
 		) );
 	}
@@ -82,13 +81,13 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 		$this->assertEquals( $scheduled_channel_id, $manifest['channel']['id'] );
 		$this->assertEquals( 12, $manifest['channel']['durationSeconds'] );
 		$this->assertEquals( 'slide', $manifest['channel']['transition'] );
-		$this->assertEquals( 2.5, $manifest['channel']['transitionDurationSeconds'] );
+		$this->assertArrayNotHasKey( 'transitionDurationSeconds', $manifest['channel'] );
 		$this->assertEquals( $slide_2_id, $manifest['slides'][0]['id'] );
 		$this->assertEquals( $slide_1_id, $manifest['slides'][1]['id'] );
 		$this->assertEquals( 'image', $manifest['slides'][0]['type'] );
 		$this->assertEquals( 'foyer-image', $manifest['slides'][0]['sourceType'] );
 		$this->assertEquals( 'http://example.internal/wp-content/uploads/foyer-test.jpg', $manifest['slides'][0]['url'] );
-		$this->assertEquals( 12, $manifest['slides'][0]['durationSeconds'] );
+		$this->assertArrayNotHasKey( 'durationSeconds', $manifest['slides'][0] );
 		$this->assertArrayHasKey( 'revision', $manifest );
 	}
 

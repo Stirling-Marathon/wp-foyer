@@ -171,6 +171,58 @@ class Test_Foyer_Admin_Channel extends Foyer_UnitTestCase {
 		$this->assertContains( '<dd>Image</dd>', $meta_boxes );
 	}
 
+	function test_slide_details_and_inactive_state_are_included_in_channel_admin_page() {
+
+		$title = 'Scheduled company update';
+		$show_from = current_datetime()->modify( '+1 hour' )->getTimestamp();
+		$show_until = current_datetime()->modify( '+2 hours' )->getTimestamp();
+		$slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+			'post_title' => $title,
+		) );
+		update_post_meta( $slide_id, Foyer_Slide::meta_show_from, $show_from );
+		update_post_meta( $slide_id, Foyer_Slide::meta_show_until, $show_until );
+
+		$channel_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Channel::post_type_name,
+		) );
+		update_post_meta( $channel_id, Foyer_Slide::post_type_name, array( $slide_id ) );
+
+		$html = Foyer_Admin_Channel::get_slides_list_html( get_post( $channel_id ) );
+
+		$this->assertContains( 'foyer-slide-is-inactive', $html );
+		$this->assertContains( 'foyer_slides_editor_slides_slide_details', $html );
+		$this->assertContains( '<dt>Title:</dt>', $html );
+		$this->assertContains( '<dd>' . $title . '</dd>', $html );
+		$this->assertContains( '<dt>Scheduled to begin:</dt>', $html );
+		$this->assertContains( '<dd>' . Foyer_Slide::format_schedule_datetime( $show_from ) . '</dd>', $html );
+		$this->assertContains( '<dt>Scheduled to end:</dt>', $html );
+		$this->assertContains( '<dd>' . Foyer_Slide::format_schedule_datetime( $show_until ) . '</dd>', $html );
+
+		delete_post_meta( $slide_id, Foyer_Slide::meta_show_from );
+		update_post_meta( $slide_id, Foyer_Slide::meta_show_until, current_datetime()->modify( '-1 hour' )->getTimestamp() );
+		$html = Foyer_Admin_Channel::get_slides_list_html( get_post( $channel_id ) );
+		$this->assertContains( 'foyer-slide-is-inactive', $html );
+	}
+
+	function test_unscheduled_slide_omits_schedule_rows_and_inactive_state() {
+
+		$slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+			'post_title' => 'Always visible',
+		) );
+		$channel_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Channel::post_type_name,
+		) );
+		update_post_meta( $channel_id, Foyer_Slide::post_type_name, array( $slide_id ) );
+
+		$html = Foyer_Admin_Channel::get_slides_list_html( get_post( $channel_id ) );
+
+		$this->assertNotContains( 'foyer-slide-is-inactive', $html );
+		$this->assertNotContains( 'Scheduled to begin', $html );
+		$this->assertNotContains( 'Scheduled to end', $html );
+	}
+
 }
 
 /**
@@ -243,6 +295,27 @@ class Test_Foyer_Admin_Channel_Ajax extends Foyer_Ajax_UnitTestCase {
 		}
 
 		$this->assertContains( $new_slide_id, $slide_ids_after );
+	}
+
+	function test_scheduled_out_slides_are_preserved_by_ajax_additions() {
+
+		$future_slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+		) );
+		$expired_slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+		) );
+		update_post_meta( $future_slide_id, Foyer_Slide::meta_show_from, current_datetime()->modify( '+1 hour' )->getTimestamp() );
+		update_post_meta( $expired_slide_id, Foyer_Slide::meta_show_until, current_datetime()->modify( '-1 hour' )->getTimestamp() );
+
+		$this->add_slide_to_channel( $future_slide_id, $this->channel1 );
+		$this->add_slide_to_channel( $expired_slide_id, $this->channel1 );
+
+		$channel = new Foyer_Channel( $this->channel1 );
+		$slide_ids = wp_list_pluck( $channel->get_all_slides(), 'ID' );
+
+		$this->assertContains( $future_slide_id, $slide_ids );
+		$this->assertContains( $expired_slide_id, $slide_ids );
 	}
 
 	function test_slide_is_removed_with_ajax_on_channel_admin_page() {

@@ -61,7 +61,7 @@ class Foyer_Admin_Channel {
 		}
 
 		$channel = new Foyer_Channel( $channel_id );
-		$slides = $channel->get_slides();
+		$slides = $channel->get_all_slides();
 
 		$new_slides = array();
 		foreach( $slides as $slide ) {
@@ -125,7 +125,7 @@ class Foyer_Admin_Channel {
 
 			$channel = new Foyer_Channel( get_the_id() );
 
-			echo count( $channel->get_slides() );
+			echo count( $channel->get_all_slides() );
 	    }
 	}
 
@@ -347,7 +347,7 @@ class Foyer_Admin_Channel {
 	static function get_slides_list_html( $post ) {
 
 		$channel = new Foyer_Channel( $post );
-		$slides = $channel->get_slides();
+		$slides = $channel->get_all_slides();
 
 		/**
 		 * Filters whether to display slide previews.
@@ -358,6 +358,7 @@ class Foyer_Admin_Channel {
 		 *												admin screen or not.
 		 */
 		$display_slide_previews = apply_filters( 'foyer/admin/channel/display_slide_previews', true );
+		$now = current_datetime();
 
 		ob_start();
 
@@ -379,17 +380,21 @@ class Foyer_Admin_Channel {
 							$slide_url = add_query_arg( 'foyer-preview', 1, $slide_url );
 							$slide_format_data = Foyer_Slides::get_slide_format_by_slug( $slide->get_format() );
 							$slide_background_data = Foyer_Slides::get_slide_background_by_slug( $slide->get_background() );
+							$slide_title = get_the_title( $slide->ID );
+							$show_from = $slide->get_show_from();
+							$show_until = $slide->get_show_until();
 
 							?>
 								<div class="foyer_slides_editor_slides_slide<?php
 									if ( $slide->is_stack() ) { echo ' foyer-slide-is-stack'; }
+									if ( ! $slide->is_visible_at( $now ) ) { echo ' foyer-slide-is-inactive'; }
 								?>"
 									data-slide-id="<?php echo intval( $slide->ID ); ?>"
 									data-slide-key="<?php echo $i; ?>"
 								>
 									<div class="foyer_slides_editor_slides_slide_iframe_container">
 										<div class="foyer_slides_editor_slides_slide_iframe_container_overlay">
-											<h4><?php echo esc_html( get_the_title( $slide->ID ) ); ?></h4>
+											<h4><?php echo esc_html( $slide_title ); ?></h4>
 											<dl>
 												<dt><?php _e( 'Format', 'foyer'); ?></dt>
 												<dd><?php echo esc_html( $slide_format_data['title'] ); ?></dd>
@@ -407,6 +412,24 @@ class Foyer_Admin_Channel {
 										<?php echo esc_html_x( 'Slide', 'slide cpt', 'foyer' ) . ' ' . ( $i + 1 ); ?>
 										(<a href="#" class="foyer_slides_editor_slides_slide_remove">x</a>)
 									</div>
+									<dl class="foyer_slides_editor_slides_slide_details">
+										<div>
+											<dt><?php echo esc_html__( 'Title:', 'foyer' ); ?></dt>
+											<dd><?php echo esc_html( $slide_title ); ?></dd>
+										</div>
+										<?php if ( ! empty( $show_from ) ) { ?>
+											<div>
+												<dt><?php echo esc_html__( 'Scheduled to begin:', 'foyer' ); ?></dt>
+												<dd><?php echo esc_html( Foyer_Slide::format_schedule_datetime( $show_from ) ); ?></dd>
+											</div>
+										<?php } ?>
+										<?php if ( ! empty( $show_until ) ) { ?>
+											<div>
+												<dt><?php echo esc_html__( 'Scheduled to end:', 'foyer' ); ?></dt>
+												<dd><?php echo esc_html( Foyer_Slide::format_schedule_datetime( $show_until ) ); ?></dd>
+											</div>
+										<?php } ?>
+									</dl>
 								</div>
 							<?php
 
@@ -515,7 +538,7 @@ class Foyer_Admin_Channel {
 		}
 
 		$channel = new Foyer_Channel( $channel_id );
-		$slides = $channel->get_slides();
+		$slides = $channel->get_all_slides();
 
 		/* Check if the channel has slides */
 		if ( empty( $slides ) ) {

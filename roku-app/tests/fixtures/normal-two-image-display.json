@@ -3,10 +3,10 @@
   "generatedAt": "2026-07-14T15:08:43Z",
   "refreshSeconds": 60,
   "display": { "id": 11, "slug": "office-upstairs", "name": "Office Upstairs" },
-  "channel": { "id": 7, "name": "Office", "durationSeconds": 8, "transition": "fade", "transitionDurationSeconds": 3 },
+  "channel": { "id": 7, "name": "Office", "durationSeconds": 8, "transition": "fade" },
   "slides": [
-    { "id": 101, "type": "image", "sourceType": "foyer-image", "url": "http://example.internal/wp-content/uploads/a.jpg", "fit": "cover", "revision": "aaa", "durationSeconds": 8 },
-    { "id": 102, "type": "image", "sourceType": "foyer-image", "url": "http://example.internal/wp-content/uploads/b.jpg", "fit": "contain", "revision": "bbb", "durationSeconds": 8 }
+    { "id": 101, "type": "image", "sourceType": "foyer-image", "url": "http://example.internal/wp-content/uploads/a.jpg", "fit": "cover", "revision": "aaa" },
+    { "id": 102, "type": "image", "sourceType": "foyer-image", "url": "http://example.internal/wp-content/uploads/b.jpg", "fit": "contain", "revision": "bbb" }
   ],
   "warnings": [],
   "revision": "normal-revision"

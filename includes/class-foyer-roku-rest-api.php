@@ -120,7 +120,7 @@ class Foyer_Roku_REST_API {
 		$channel = new Foyer_Channel( $channel_post );
 		$warnings = array();
 		$duration = intval( $channel->get_slides_duration() );
-		$slides = self::build_slides( $channel, $duration, $warnings );
+		$slides = self::build_slides( $channel, $warnings );
 
 		$manifest = array(
 			'schemaVersion' => 1,
@@ -132,7 +132,6 @@ class Foyer_Roku_REST_API {
 				'name' => get_the_title( $channel_post ),
 				'durationSeconds' => $duration,
 				'transition' => $channel->get_slides_transition(),
-				'transitionDurationSeconds' => floatval( Foyer_Settings::get( 'transition_duration_seconds' ) ),
 			),
 			'slides' => $slides,
 			'warnings' => $warnings,
@@ -147,11 +146,10 @@ class Foyer_Roku_REST_API {
 	 * Builds manifest slide records.
 	 *
 	 * @param Foyer_Channel $channel Channel model.
-	 * @param int           $duration Slide duration in seconds.
 	 * @param array         $warnings Warning records.
 	 * @return array
 	 */
-	private static function build_slides( $channel, $duration, &$warnings ) {
+	private static function build_slides( $channel, &$warnings ) {
 		$slides = array();
 
 		foreach ( $channel->get_slides() as $slide ) {
@@ -169,8 +167,6 @@ class Foyer_Roku_REST_API {
 				);
 				continue;
 			}
-
-			$slide_record['durationSeconds'] = intval( $duration );
 
 			if ( ! empty( $slide_record['warning'] ) ) {
 				$warnings[] = $slide_record['warning'];
