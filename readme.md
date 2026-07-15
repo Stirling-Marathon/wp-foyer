@@ -158,6 +158,8 @@ wp-content/uploads/foyer-roku/
 
 The worker writes to a temporary PNG first, then atomically replaces the public snapshot only after a successful render. Previous successful snapshots remain in place if a refresh fails.
 
+When the same iframe slide is used by multiple displays or active channels, the worker renders that slide once per refresh run and reuses the same snapshot file.
+
 ## systemd Timer
 
 Example files are provided:

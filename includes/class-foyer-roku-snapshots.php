@@ -22,7 +22,7 @@ class Foyer_Roku_Snapshots {
 	 * @return array
 	 */
 	static function get_active_iframe_slide_jobs() {
-		$jobs = array();
+		$jobs_by_slide_id = array();
 		$display_posts = Foyer_Displays::get_posts( array(
 			'post_status' => 'publish',
 			'orderby' => 'ID',
@@ -45,16 +45,22 @@ class Foyer_Roku_Snapshots {
 				}
 
 				$url = get_post_meta( $slide->ID, 'slide_iframe_website_url', true );
-				$jobs[] = array(
+				$slide_id = intval( $slide->ID );
+
+				if ( isset( $jobs_by_slide_id[ $slide_id ] ) ) {
+					continue;
+				}
+
+				$jobs_by_slide_id[ $slide_id ] = array(
 					'display_id' => intval( $display_post->ID ),
 					'channel_id' => intval( $channel_id ),
-					'slide_id' => intval( $slide->ID ),
+					'slide_id' => $slide_id,
 					'url' => $url,
 				);
 			}
 		}
 
-		return $jobs;
+		return array_values( $jobs_by_slide_id );
 	}
 
 	/**

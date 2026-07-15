@@ -135,6 +135,7 @@ Useful log lines include display-list requests, manifest refreshes, image cache 
 - Image cache keys use slide ID plus slide revision, so unchanged URLs can still refresh when the server revision changes.
 - Temporary network failures keep the last valid content playing.
 - If no live manifest is available, the app attempts to play the cached manifest and cached images.
+- For unattended signage, disable the Roku screensaver and auto power saving in the device settings. Press the Roku Home button to leave the app.
 
 ## Artwork
 

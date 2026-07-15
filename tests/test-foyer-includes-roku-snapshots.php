@@ -123,6 +123,41 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 		$this->assertEquals( $channel_id, $jobs[0]['channel_id'] );
 	}
 
+	function test_snapshot_jobs_are_deduplicated_by_slide_id() {
+		$shared_iframe_id = $this->create_iframe_slide( 'http://display-01/shared' );
+
+		$first_channel_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Channel::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $first_channel_id, Foyer_Slide::post_type_name, array( $shared_iframe_id ) );
+
+		$second_channel_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Channel::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $second_channel_id, Foyer_Slide::post_type_name, array( $shared_iframe_id ) );
+
+		$first_display_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Display::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $first_display_id, Foyer_Channel::post_type_name, $first_channel_id );
+
+		$second_display_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Display::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $second_display_id, Foyer_Channel::post_type_name, $second_channel_id );
+
+		$jobs = Foyer_Roku_Snapshots::get_active_iframe_slide_jobs();
+		$matches = array_filter( $jobs, function( $job ) use ( $shared_iframe_id ) {
+			return intval( $job['slide_id'] ) === intval( $shared_iframe_id );
+		} );
+
+		$this->assertCount( 1, $matches );
+	}
+
 	function test_get_valid_url_data_normalizes_host_without_requiring_allowlist() {
 		$result = Foyer_Roku_Snapshots::get_valid_url_data( 'https://EXAMPLE.internal/path?token=redacted' );
 
