@@ -99,31 +99,96 @@ class Foyer_Channel {
 	 * @access	public
 	 * @return	array of Foyer_Slide	The slides for this channel.
 	 */
-	public function get_slides() {
+	public function get_slides( $time = null ) {
 
-		if ( ! isset( $this->slides ) ) {
+		$cache_key = $this->get_slide_cache_key( $time, false );
 
-			$slides = array();
+		if ( ! isset( $this->slides[ $cache_key ] ) ) {
 
-			$posts = get_post_meta( $this->ID, Foyer_Slide::post_type_name, true );
+			$slides = $this->get_filtered_slides( $time, false );
 
-			if ( ! empty( $posts ) ) {
-				foreach ( $posts as $post ) {
-
-					// Only include slides with post status 'publish'
-					if ( 'publish' != get_post_status( $post ) ) {
-						continue;
-					}
-
-					$slide = new Foyer_Slide( $post );
-					$slides[] = $slide;
-				}
-			}
-
-			$this->slides = $slides;
+			$this->slides[ $cache_key ] = $slides;
 		}
 
-		return $this->slides;
+		return $this->slides[ $cache_key ];
+	}
+
+	/**
+	 * Get slides that are visible now or scheduled for the future.
+	 *
+	 * Used by the Roku snapshot worker to pre-generate upcoming iframe snapshots.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @access	public
+	 * @param DateTimeInterface|null $time The comparison time. Defaults to current site time.
+	 * @return	array of Foyer_Slide	The current and future slides for this channel.
+	 */
+	public function get_current_and_future_slides( $time = null ) {
+
+		$cache_key = $this->get_slide_cache_key( $time, true );
+
+		if ( ! isset( $this->slides[ $cache_key ] ) ) {
+			$this->slides[ $cache_key ] = $this->get_filtered_slides( $time, true );
+		}
+
+		return $this->slides[ $cache_key ];
+	}
+
+	/**
+	 * Returns filtered slides while preserving configured order.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param DateTimeInterface|null $time The comparison time.
+	 * @param bool                   $include_future Whether future scheduled slides should be included.
+	 * @return array
+	 */
+	private function get_filtered_slides( $time = null, $include_future = false ) {
+		$slides = array();
+		$posts = get_post_meta( $this->ID, Foyer_Slide::post_type_name, true );
+
+		if ( empty( $posts ) ) {
+			return $slides;
+		}
+
+		foreach ( $posts as $post ) {
+
+			// Only include slides with post status 'publish'
+			if ( 'publish' != get_post_status( $post ) ) {
+				continue;
+			}
+
+			$slide = new Foyer_Slide( $post );
+
+			if ( $include_future ) {
+				if ( ! $slide->is_current_or_future_at( $time ) ) {
+					continue;
+				}
+			}
+			else if ( ! $slide->is_visible_at( $time ) ) {
+				continue;
+			}
+
+			$slides[] = $slide;
+		}
+
+		return $slides;
+	}
+
+	/**
+	 * Builds a cache key for filtered slide lists.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param DateTimeInterface|null $time The comparison time.
+	 * @param bool                   $include_future Whether future slides are included.
+	 * @return string
+	 */
+	private function get_slide_cache_key( $time = null, $include_future = false ) {
+		$timestamp = $time instanceof DateTimeInterface ? $time->getTimestamp() : current_datetime()->getTimestamp();
+
+		return ( $include_future ? 'future' : 'visible' ) . ':' . $timestamp;
 	}
 
 	/**

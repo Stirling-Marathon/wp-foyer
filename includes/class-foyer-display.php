@@ -136,14 +136,16 @@ class Foyer_Display {
 				return $this->active_channel;
 			}
 
+			$now = current_datetime()->getTimestamp();
+
 			// Return the first scheduled channel that matches the current time, has a channel set, and channel is published.
 			foreach ( $schedule as $scheduled_channel ) {
 
-				if ( $scheduled_channel['start'] > time() ) {
+				if ( $scheduled_channel['start'] > $now ) {
 					continue;
 				}
 
-				if ( $scheduled_channel['end'] < time() ) {
+				if ( $now >= $scheduled_channel['end'] ) {
 					continue;
 				}
 

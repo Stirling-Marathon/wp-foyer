@@ -39,7 +39,7 @@ class Foyer_Roku_Snapshots {
 
 			$channel = new Foyer_Channel( $channel_id );
 
-			foreach ( $channel->get_slides() as $slide ) {
+			foreach ( $channel->get_current_and_future_slides() as $slide ) {
 				if ( 'iframe' !== $slide->get_format() ) {
 					continue;
 				}
@@ -70,6 +70,38 @@ class Foyer_Roku_Snapshots {
 			return self::error( 'empty_url', __( 'The iframe URL is empty.', 'foyer' ) );
 		}
 
+		$url_data = self::get_valid_url_data( $url );
+		if ( is_wp_error( $url_data ) ) {
+			return $url_data;
+		}
+
+		$host = $url_data['host'];
+
+		$allowed_hosts = self::get_allowed_hosts();
+		if ( ! in_array( $host, $allowed_hosts, true ) ) {
+			return self::error( 'host_not_allowed', __( 'The iframe URL host is not allowed for Roku snapshots.', 'foyer' ) );
+		}
+
+		return array(
+			'url' => esc_url_raw( $url ),
+			'scheme' => $url_data['scheme'],
+			'host' => $host,
+		);
+	}
+
+	/**
+	 * Validates an iframe URL without checking the snapshot host allowlist.
+	 *
+	 * @param string $url URL to validate.
+	 * @return array|WP_Error
+	 */
+	static function get_valid_url_data( $url ) {
+		$url = trim( (string) $url );
+
+		if ( '' === $url ) {
+			return self::error( 'empty_url', __( 'The iframe URL is empty.', 'foyer' ) );
+		}
+
 		$parts = parse_url( $url );
 
 		if ( empty( $parts['scheme'] ) || empty( $parts['host'] ) ) {
@@ -88,11 +120,6 @@ class Foyer_Roku_Snapshots {
 		$host = self::normalize_host( $parts['host'] );
 		if ( is_wp_error( $host ) ) {
 			return $host;
-		}
-
-		$allowed_hosts = self::get_allowed_hosts();
-		if ( ! in_array( $host, $allowed_hosts, true ) ) {
-			return self::error( 'host_not_allowed', __( 'The iframe URL host is not allowed for Roku snapshots.', 'foyer' ) );
 		}
 
 		return array(

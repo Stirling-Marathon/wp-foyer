@@ -11,6 +11,10 @@
  */
 class Foyer_Slide {
 
+	const meta_show_from = 'foyer_slide_show_from';
+	const meta_show_until = 'foyer_slide_show_until';
+	const schedule_datetime_format = 'Y-m-d H:i';
+
 	/**
 	 * The Foyer Slide post type name.
 	 *
@@ -226,6 +230,134 @@ class Foyer_Slide {
 		}
 
 		return $slide_format;
+	}
+
+	/**
+	 * Checks whether this slide should be visible at a specific time.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param DateTimeInterface|null $time The comparison time. Defaults to the current site time.
+	 * @return bool True when the slide is within its optional visibility window.
+	 */
+	public function is_visible_at( $time = null ) {
+		$timestamp = self::get_timestamp_for_comparison( $time );
+		$show_from = $this->get_show_from();
+		$show_until = $this->get_show_until();
+
+		if ( ! empty( $show_from ) && $show_from > $timestamp ) {
+			return false;
+		}
+
+		if ( ! empty( $show_until ) && $timestamp >= $show_until ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks whether this slide is active now or scheduled for the future.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param DateTimeInterface|null $time The comparison time. Defaults to the current site time.
+	 * @return bool True when the slide has not expired.
+	 */
+	public function is_current_or_future_at( $time = null ) {
+		$timestamp = self::get_timestamp_for_comparison( $time );
+		$show_until = $this->get_show_until();
+
+		return empty( $show_until ) || $timestamp < $show_until;
+	}
+
+	/**
+	 * Gets the show-from timestamp.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @return int
+	 */
+	public function get_show_from() {
+		return intval( get_post_meta( $this->ID, self::meta_show_from, true ) );
+	}
+
+	/**
+	 * Gets the show-until timestamp.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @return int
+	 */
+	public function get_show_until() {
+		return intval( get_post_meta( $this->ID, self::meta_show_until, true ) );
+	}
+
+	/**
+	 * Formats a stored slide schedule timestamp for admin fields.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param int $timestamp Stored timestamp.
+	 * @return string
+	 */
+	static function format_schedule_datetime( $timestamp ) {
+		$timestamp = intval( $timestamp );
+
+		if ( empty( $timestamp ) ) {
+			return '';
+		}
+
+		$date = new DateTimeImmutable( '@' . $timestamp );
+		$date = $date->setTimezone( wp_timezone() );
+
+		return $date->format( self::schedule_datetime_format );
+	}
+
+	/**
+	 * Parses an admin schedule datetime string in the WordPress timezone.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param string $value Admin field value.
+	 * @return int|WP_Error
+	 */
+	static function parse_schedule_datetime( $value ) {
+		$value = trim( (string) $value );
+
+		if ( '' === $value ) {
+			return 0;
+		}
+
+		$timezone = wp_timezone();
+		$date = DateTimeImmutable::createFromFormat( '!' . self::schedule_datetime_format, $value, $timezone );
+		$errors = DateTimeImmutable::getLastErrors();
+
+		if (
+			false === $date ||
+			( is_array( $errors ) && ( ! empty( $errors['warning_count'] ) || ! empty( $errors['error_count'] ) ) ) ||
+			$value !== $date->format( self::schedule_datetime_format )
+		) {
+			return new WP_Error( 'invalid_slide_schedule_datetime', __( 'Slide schedule dates must use the configured date and time format.', 'foyer' ) );
+		}
+
+		return $date->getTimestamp();
+	}
+
+	/**
+	 * Returns a Unix timestamp for schedule comparisons.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param DateTimeInterface|null $time The comparison time.
+	 * @return int
+	 */
+	private static function get_timestamp_for_comparison( $time = null ) {
+		if ( $time instanceof DateTimeInterface ) {
+			return $time->getTimestamp();
+		}
+
+		return current_datetime()->getTimestamp();
 	}
 
 	/**

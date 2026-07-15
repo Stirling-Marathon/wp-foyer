@@ -14,7 +14,7 @@ Edit `roku-app/config.local.json`:
 
 ```json
 {
-  "apiBaseUrl": "http://your-internal-server.example/wp-json/your-foyer-namespace/v1"
+  "apiBaseUrl": "http://your-internal-server.example/wp-json/foyer/v1"
 }
 ```
 

@@ -91,4 +91,54 @@ class Test_Foyer_Includes_Roku_Snapshots extends Foyer_UnitTestCase {
 		$this->assertWPError( $result );
 		$this->assertEquals( 'previous snapshot', file_get_contents( $target['path'] ) );
 	}
+
+	function test_snapshot_jobs_include_current_and_future_iframe_slides_but_skip_expired() {
+		$now = current_datetime();
+		$current_iframe_id = $this->create_iframe_slide( 'http://display-01/current' );
+		$future_iframe_id = $this->create_iframe_slide( 'http://display-01/future' );
+		$expired_iframe_id = $this->create_iframe_slide( 'http://display-01/expired' );
+
+		update_post_meta( $future_iframe_id, Foyer_Slide::meta_show_from, $now->modify( '+10 minutes' )->getTimestamp() );
+		update_post_meta( $expired_iframe_id, Foyer_Slide::meta_show_until, $now->modify( '-10 minutes' )->getTimestamp() );
+
+		$channel_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Channel::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $channel_id, Foyer_Slide::post_type_name, array( $current_iframe_id, $future_iframe_id, $expired_iframe_id ) );
+
+		$display_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Display::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $display_id, Foyer_Channel::post_type_name, $channel_id );
+
+		$jobs = Foyer_Roku_Snapshots::get_active_iframe_slide_jobs();
+		$slide_ids = wp_list_pluck( $jobs, 'slide_id' );
+
+		$this->assertContains( $current_iframe_id, $slide_ids );
+		$this->assertContains( $future_iframe_id, $slide_ids );
+		$this->assertNotContains( $expired_iframe_id, $slide_ids );
+		$this->assertEquals( $display_id, $jobs[0]['display_id'] );
+		$this->assertEquals( $channel_id, $jobs[0]['channel_id'] );
+	}
+
+	function test_get_valid_url_data_normalizes_host_without_requiring_allowlist() {
+		$result = Foyer_Roku_Snapshots::get_valid_url_data( 'https://EXAMPLE.internal/path?token=redacted' );
+
+		$this->assertFalse( is_wp_error( $result ) );
+		$this->assertEquals( 'example.internal', $result['host'] );
+		$this->assertEquals( 'https', $result['scheme'] );
+	}
+
+	private function create_iframe_slide( $url ) {
+		$slide_id = $this->factory->post->create( array(
+			'post_type' => Foyer_Slide::post_type_name,
+			'post_status' => 'publish',
+		) );
+		add_post_meta( $slide_id, 'slide_format', 'iframe' );
+		add_post_meta( $slide_id, 'slide_iframe_website_url', $url );
+
+		return $slide_id;
+	}
 }

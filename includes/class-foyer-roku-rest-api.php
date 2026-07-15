@@ -8,7 +8,7 @@
  */
 class Foyer_Roku_REST_API {
 
-	const rest_namespace = 'stirling-foyer/v1';
+	const rest_namespace = 'foyer/v1';
 
 	/**
 	 * Registers REST routes.
@@ -105,7 +105,7 @@ class Foyer_Roku_REST_API {
 
 		if ( empty( $channel_id ) || 'publish' !== get_post_status( $channel_id ) ) {
 			return new WP_Error(
-				'stirling_foyer_no_active_channel',
+				'foyer_no_active_channel',
 				__( 'The display does not have a published active channel.', 'foyer' ),
 				array( 'status' => 404 )
 			);
@@ -319,7 +319,7 @@ class Foyer_Roku_REST_API {
 	 */
 	private static function not_found_error() {
 		return new WP_Error(
-			'stirling_foyer_display_not_found',
+			'foyer_display_not_found',
 			__( 'Display not found.', 'foyer' ),
 			array( 'status' => 404 )
 		);

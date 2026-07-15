@@ -45,7 +45,7 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 			'post_status' => 'draft',
 		) );
 
-		$request = new WP_REST_Request( 'GET', '/stirling-foyer/v1/displays' );
+		$request = new WP_REST_Request( 'GET', '/foyer/v1/displays' );
 		$response = Foyer_Roku_REST_API::get_displays( $request );
 		$data = $response->get_data();
 
@@ -100,11 +100,11 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 			'post_status' => 'draft',
 		) );
 
-		$invalid_request = new WP_REST_Request( 'GET', '/stirling-foyer/v1/displays/missing-display' );
+		$invalid_request = new WP_REST_Request( 'GET', '/foyer/v1/displays/missing-display' );
 		$invalid_request->set_param( 'slug', 'missing-display' );
 		$invalid_response = Foyer_Roku_REST_API::get_display_manifest( $invalid_request );
 
-		$draft_request = new WP_REST_Request( 'GET', '/stirling-foyer/v1/displays/draft-display' );
+		$draft_request = new WP_REST_Request( 'GET', '/foyer/v1/displays/draft-display' );
 		$draft_request->set_param( 'slug', 'draft-display' );
 		$draft_response = Foyer_Roku_REST_API::get_display_manifest( $draft_request );
 
@@ -192,6 +192,56 @@ class Test_Foyer_Includes_Roku_REST_API extends Foyer_UnitTestCase {
 
 		$this->assertCount( 1, $manifest['slides'] );
 		$this->assertEquals( $published_slide_id, $manifest['slides'][0]['id'] );
+	}
+
+	function test_manifest_excludes_future_and_expired_slides() {
+		$visible_slide_id = $this->create_image_slide();
+		$future_slide_id = $this->create_image_slide();
+		$expired_slide_id = $this->create_image_slide();
+		$now = current_datetime();
+
+		update_post_meta( $future_slide_id, Foyer_Slide::meta_show_from, $now->modify( '+10 minutes' )->getTimestamp() );
+		update_post_meta( $expired_slide_id, Foyer_Slide::meta_show_until, $now->modify( '-10 minutes' )->getTimestamp() );
+
+		$channel_id = $this->create_channel( 'Scheduled Slides', array( $future_slide_id, $visible_slide_id, $expired_slide_id ) );
+		$display_id = $this->create_display( 'Scheduled Display', 'scheduled-display', $channel_id );
+
+		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertCount( 1, $manifest['slides'] );
+		$this->assertEquals( $visible_slide_id, $manifest['slides'][0]['id'] );
+	}
+
+	function test_manifest_warnings_only_include_eligible_slides() {
+		$visible_iframe_id = $this->create_iframe_slide();
+		$future_iframe_id = $this->create_iframe_slide();
+		$now = current_datetime();
+
+		update_post_meta( $future_iframe_id, Foyer_Slide::meta_show_from, $now->modify( '+10 minutes' )->getTimestamp() );
+
+		$channel_id = $this->create_channel( 'Iframe Slides', array( $visible_iframe_id, $future_iframe_id ) );
+		$display_id = $this->create_display( 'Iframe Display', 'iframe-display', $channel_id );
+
+		$manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertCount( 1, $manifest['slides'] );
+		$this->assertEquals( $visible_iframe_id, $manifest['slides'][0]['id'] );
+		$this->assertCount( 1, $manifest['warnings'] );
+		$this->assertEquals( $visible_iframe_id, $manifest['warnings'][0]['slideId'] );
+	}
+
+	function test_manifest_revision_changes_when_slide_eligibility_changes() {
+		$slide_id = $this->create_image_slide();
+		$channel_id = $this->create_channel( 'Scheduled Slides', array( $slide_id ) );
+		$display_id = $this->create_display( 'Scheduled Display', 'scheduled-display', $channel_id );
+
+		$visible_manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+		update_post_meta( $slide_id, Foyer_Slide::meta_show_from, current_datetime()->modify( '+10 minutes' )->getTimestamp() );
+		$hidden_manifest = Foyer_Roku_REST_API::build_display_manifest( get_post( $display_id ) );
+
+		$this->assertCount( 1, $visible_manifest['slides'] );
+		$this->assertCount( 0, $hidden_manifest['slides'] );
+		$this->assertNotEquals( $visible_manifest['revision'], $hidden_manifest['revision'] );
 	}
 
 	private function create_channel( $title, $slides, $duration = 8, $transition = 'fade' ) {

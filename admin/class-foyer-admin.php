@@ -52,6 +52,7 @@ class Foyer_Admin {
 		add_action( 'admin_enqueue_scripts', array( 'Foyer_Admin_Slide', 'localize_scripts' ) );
 		add_action( 'add_meta_boxes', array( 'Foyer_Admin_Slide', 'add_slide_editor_meta_boxes' ) );
 		add_action( 'save_post', array( 'Foyer_Admin_Slide', 'save_slide' ) );
+		add_action( 'admin_notices', array( 'Foyer_Admin_Slide', 'display_admin_notices' ) );
 		add_filter( 'get_sample_permalink_html', array( 'Foyer_Admin_Slide', 'remove_sample_permalink' ) );
 		add_filter( 'manage_'.Foyer_Slide::post_type_name.'_posts_columns', array( 'Foyer_Admin_Slide', 'add_slide_format_column' ) );
 		add_action( 'manage_'.Foyer_Slide::post_type_name.'_posts_custom_column', array( 'Foyer_Admin_Slide', 'do_slide_format_column' ), 10, 2 );

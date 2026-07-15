@@ -110,6 +110,71 @@ class Test_Foyer_Admin_Slide extends Foyer_UnitTestCase {
 		$this->assertEquals( $slide_background, $actual );
 	}
 
+	function test_slide_schedule_fields_are_displayed_on_slide_admin_page() {
+		$meta_boxes = $this->get_meta_boxes_for_slide( $this->slide1 );
+
+		$this->assertContains( 'name="foyer_slide_show_from"', $meta_boxes );
+		$this->assertContains( 'name="foyer_slide_show_until"', $meta_boxes );
+	}
+
+	function test_is_slide_schedule_saved() {
+		$this->assume_role( 'administrator' );
+
+		$_POST[ Foyer_Slide::post_type_name.'_nonce' ] = wp_create_nonce( Foyer_Slide::post_type_name );
+		$_POST['slide_format'] = 'default';
+		$_POST['slide_background'] = 'image';
+		$_POST['slide_bg_image_image'] = '';
+		$_POST['foyer_slide_show_from'] = '2026-07-14 09:00';
+		$_POST['foyer_slide_show_until'] = '2026-07-14 17:00';
+
+		Foyer_Admin_Slide::save_slide( $this->slide1 );
+
+		$this->assertEquals( Foyer_Slide::parse_schedule_datetime( '2026-07-14 09:00' ), get_post_meta( $this->slide1, Foyer_Slide::meta_show_from, true ) );
+		$this->assertEquals( Foyer_Slide::parse_schedule_datetime( '2026-07-14 17:00' ), get_post_meta( $this->slide1, Foyer_Slide::meta_show_until, true ) );
+	}
+
+	function test_invalid_slide_schedule_preserves_existing_metadata() {
+		$this->assume_role( 'administrator' );
+		$existing_from = Foyer_Slide::parse_schedule_datetime( '2026-07-14 09:00' );
+		$existing_until = Foyer_Slide::parse_schedule_datetime( '2026-07-14 17:00' );
+		update_post_meta( $this->slide1, Foyer_Slide::meta_show_from, $existing_from );
+		update_post_meta( $this->slide1, Foyer_Slide::meta_show_until, $existing_until );
+
+		$_POST[ Foyer_Slide::post_type_name.'_nonce' ] = wp_create_nonce( Foyer_Slide::post_type_name );
+		$_POST['slide_format'] = 'default';
+		$_POST['slide_background'] = 'image';
+		$_POST['slide_bg_image_image'] = '';
+		$_POST['foyer_slide_show_from'] = '2026-07-14 18:00';
+		$_POST['foyer_slide_show_until'] = '2026-07-14 17:00';
+
+		Foyer_Admin_Slide::save_slide( $this->slide1 );
+
+		$this->assertEquals( $existing_from, get_post_meta( $this->slide1, Foyer_Slide::meta_show_from, true ) );
+		$this->assertEquals( $existing_until, get_post_meta( $this->slide1, Foyer_Slide::meta_show_until, true ) );
+	}
+
+	function test_slide_format_column_contains_scheduled_hint_for_future_slide() {
+		update_post_meta( $this->slide1, Foyer_Slide::meta_show_from, current_datetime()->modify( '+1 hour' )->getTimestamp() );
+
+		ob_start();
+		Foyer_Admin_Slide::do_slide_format_column( 'slide_format', $this->slide1 );
+		$output = ob_get_clean();
+
+		$this->assertContains( 'Scheduled', $output );
+		$this->assertNotContains( 'Expired', $output );
+	}
+
+	function test_slide_format_column_contains_expired_hint_for_expired_slide() {
+		update_post_meta( $this->slide1, Foyer_Slide::meta_show_until, current_datetime()->modify( '-1 hour' )->getTimestamp() );
+
+		ob_start();
+		Foyer_Admin_Slide::do_slide_format_column( 'slide_format', $this->slide1 );
+		$output = ob_get_clean();
+
+		$this->assertContains( 'Expired', $output );
+		$this->assertNotContains( 'Scheduled', $output );
+	}
+
 	/**
 	 * @since	1.4.0
 	 */

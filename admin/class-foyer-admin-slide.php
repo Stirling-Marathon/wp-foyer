@@ -12,6 +12,8 @@
  */
 class Foyer_Admin_Slide {
 
+	const admin_notices_user_meta = '_foyer_slide_admin_notices';
+
 	/**
 	 * Adds the channel editor meta box to the display admin page.
 	 *
@@ -77,7 +79,50 @@ class Foyer_Admin_Slide {
 			$background = Foyer_Slides::get_slide_background_by_slug( $slide->get_background() );
 
 			echo esc_html( $format['title'] ) . '<br />' . esc_html( $background['title'] );
+			self::slide_schedule_status_html( $slide );
 	    }
+	}
+
+	/**
+	 * Outputs a compact slide schedule status in the slides admin list.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param Foyer_Slide $slide Slide model.
+	 * @return void
+	 */
+	private static function slide_schedule_status_html( $slide ) {
+		$status = self::get_slide_schedule_status( $slide );
+
+		if ( empty( $status ) ) {
+			return;
+		}
+
+		echo '<br /><span class="post-state">' . esc_html( $status ) . '</span>';
+	}
+
+	/**
+	 * Gets the compact slide schedule status for the slides admin list.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param Foyer_Slide $slide Slide model.
+	 * @return string
+	 */
+	static function get_slide_schedule_status( $slide ) {
+		$now = current_datetime()->getTimestamp();
+		$show_from = $slide->get_show_from();
+		$show_until = $slide->get_show_until();
+
+		if ( ! empty( $show_until ) && $now >= $show_until ) {
+			return __( 'Expired', 'foyer' );
+		}
+
+		if ( ! empty( $show_from ) && $show_from > $now ) {
+			return __( 'Scheduled', 'foyer' );
+		}
+
+		return '';
 	}
 
 	/**
@@ -114,6 +159,13 @@ class Foyer_Admin_Slide {
 
 		$slide_formats_backgrounds = Foyer_Slides::get_slide_formats_backgrounds();
 		wp_localize_script( Foyer::get_plugin_name() . '-admin', 'foyer_slide_formats_backgrounds', $slide_formats_backgrounds );
+
+		$channel_scheduler_defaults = Foyer_Admin_Display::get_channel_scheduler_defaults();
+		wp_localize_script( Foyer::get_plugin_name() . '-admin', 'foyer_slide_scheduler_defaults', $channel_scheduler_defaults );
+		wp_add_inline_script(
+			Foyer::get_plugin_name() . '-admin',
+			'jQuery(function(){var fields=jQuery(".foyer_slide_schedule_datetime");if(!fields.length||typeof foyer_slide_scheduler_defaults==="undefined"){return;}jQuery.foyer_datetimepicker.setLocale(foyer_slide_scheduler_defaults.locale);fields.foyer_datetimepicker({format:foyer_slide_scheduler_defaults.datetime_format,dayOfWeekStart:foyer_slide_scheduler_defaults.start_of_week,step:15});});'
+		);
 	}
 
 	/**
@@ -199,6 +251,7 @@ class Foyer_Admin_Slide {
 		}
 
 		update_post_meta( $post_id, 'slide_format', $slide_format_slug );
+		self::save_schedule( $post_id );
 
 		if ( ! empty( $slide_format['save_post'] ) ) {
 			call_user_func_array( $slide_format['save_post'], array( $post_id ) );
@@ -289,6 +342,7 @@ class Foyer_Admin_Slide {
 			</div>
 		</div>
 
+		<?php self::slide_schedule_fields_html( $slide ); ?>
 
 		<div class="foyer_slide_formats"><?php
 
@@ -364,6 +418,149 @@ class Foyer_Admin_Slide {
 					<?php echo esc_html( $slide_format_data['title'] ); ?>
 				</option><?php
 			}
+		}
+	}
+
+	/**
+	 * Outputs slide schedule fields.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param Foyer_Slide $slide Slide model.
+	 * @return void
+	 */
+	private static function slide_schedule_fields_html( $slide ) {
+		$show_from = Foyer_Slide::format_schedule_datetime( $slide->get_show_from() );
+		$show_until = Foyer_Slide::format_schedule_datetime( $slide->get_show_until() );
+
+		?>
+		<table class="form-table foyer_slide_schedule">
+			<tbody>
+				<tr>
+					<th scope="row">
+						<label for="foyer_slide_show_from"><?php echo esc_html__( 'Show from', 'foyer' ); ?></label>
+					</th>
+					<td>
+						<input type="text" id="foyer_slide_show_from" name="foyer_slide_show_from" class="foyer_slide_schedule_datetime" value="<?php echo esc_attr( $show_from ); ?>" />
+					</td>
+				</tr>
+				<tr>
+					<th scope="row">
+						<label for="foyer_slide_show_until"><?php echo esc_html__( 'Until', 'foyer' ); ?></label>
+					</th>
+					<td>
+						<input type="text" id="foyer_slide_show_until" name="foyer_slide_show_until" class="foyer_slide_schedule_datetime" value="<?php echo esc_attr( $show_until ); ?>" />
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Saves optional slide schedule metadata.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param int $post_id Slide ID.
+	 * @return void
+	 */
+	private static function save_schedule( $post_id ) {
+		if ( ! isset( $_POST['foyer_slide_show_from'] ) || ! isset( $_POST['foyer_slide_show_until'] ) ) {
+			return;
+		}
+
+		$show_from = Foyer_Slide::parse_schedule_datetime( sanitize_text_field( $_POST['foyer_slide_show_from'] ) );
+		$show_until = Foyer_Slide::parse_schedule_datetime( sanitize_text_field( $_POST['foyer_slide_show_until'] ) );
+
+		if ( is_wp_error( $show_from ) || is_wp_error( $show_until ) ) {
+			self::add_admin_notice( 'error', __( 'Slide schedule was not saved. Use the date format YYYY-MM-DD HH:MM.', 'foyer' ) );
+			return;
+		}
+
+		if ( ! empty( $show_from ) && ! empty( $show_until ) && $show_until <= $show_from ) {
+			self::add_admin_notice( 'error', __( 'Slide schedule was not saved. Until must be later than Show from.', 'foyer' ) );
+			return;
+		}
+
+		if ( empty( $show_from ) ) {
+			delete_post_meta( $post_id, Foyer_Slide::meta_show_from );
+		}
+		else {
+			update_post_meta( $post_id, Foyer_Slide::meta_show_from, $show_from );
+		}
+
+		if ( empty( $show_until ) ) {
+			delete_post_meta( $post_id, Foyer_Slide::meta_show_until );
+		}
+		else {
+			update_post_meta( $post_id, Foyer_Slide::meta_show_until, $show_until );
+		}
+	}
+
+	/**
+	 * Stores a dismissible admin notice for the current user.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param string $type Notice type.
+	 * @param string $message Notice text.
+	 * @return void
+	 */
+	static function add_admin_notice( $type, $message ) {
+		$user_id = get_current_user_id();
+
+		if ( empty( $user_id ) ) {
+			return;
+		}
+
+		$notices = get_user_meta( $user_id, self::admin_notices_user_meta, true );
+		if ( ! is_array( $notices ) ) {
+			$notices = array();
+		}
+
+		$notices[] = array(
+			'type' => sanitize_html_class( $type ),
+			'message' => sanitize_text_field( $message ),
+		);
+
+		update_user_meta( $user_id, self::admin_notices_user_meta, $notices );
+	}
+
+	/**
+	 * Displays and clears slide admin notices.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @return void
+	 */
+	static function display_admin_notices() {
+		$user_id = get_current_user_id();
+
+		if ( empty( $user_id ) ) {
+			return;
+		}
+
+		$notices = get_user_meta( $user_id, self::admin_notices_user_meta, true );
+		if ( empty( $notices ) || ! is_array( $notices ) ) {
+			return;
+		}
+
+		delete_user_meta( $user_id, self::admin_notices_user_meta );
+
+		foreach ( $notices as $notice ) {
+			$type = empty( $notice['type'] ) ? 'info' : sanitize_html_class( $notice['type'] );
+			$message = empty( $notice['message'] ) ? '' : sanitize_text_field( $notice['message'] );
+
+			if ( '' === $message ) {
+				continue;
+			}
+
+			printf(
+				'<div class="notice notice-%1$s is-dismissible"><p>%2$s</p></div>',
+				esc_attr( $type ),
+				esc_html( $message )
+			);
 		}
 	}
 }

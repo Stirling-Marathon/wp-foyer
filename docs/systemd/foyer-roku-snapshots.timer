@@ -1,5 +1,5 @@
 [Unit]
-Description=Run Stirling Foyer Roku webpage snapshot refresh
+Description=Run WordPress Foyer Roku webpage snapshot refresh
 
 [Timer]
 OnBootSec=2min

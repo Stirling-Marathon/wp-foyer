@@ -79,6 +79,30 @@ function update_slide_format_meta_boxes() {
 	$meta_boxes.hide().filter('#foyer_slide_format_'+slide_format).show();
 }
 
+/**
+ * Initializes the slide scheduler datetime fields.
+ *
+ * @since	1.8.0-stirling.1
+ *
+ * @return 	void
+ */
+function foyer_slide_setup_scheduler() {
+	var $schedule_datetimes;
+
+	$schedule_datetimes = jQuery('.foyer_slide_schedule_datetime');
+
+	if (!$schedule_datetimes.length || typeof foyer_slide_scheduler_defaults === 'undefined') {
+		return;
+	}
+
+	jQuery.foyer_datetimepicker.setLocale(foyer_slide_scheduler_defaults.locale);
+	$schedule_datetimes.foyer_datetimepicker({
+		format: foyer_slide_scheduler_defaults.datetime_format,
+		dayOfWeekStart: foyer_slide_scheduler_defaults.start_of_week,
+		step: 15
+	});
+}
+
 jQuery( function() {
 
 	if (jQuery('#foyer_slide_content select[name=slide_format], #foyer_slide_content select[name=slide_background]').length) {
@@ -97,6 +121,8 @@ jQuery( function() {
 	jQuery('#foyer_slide_content select[name=slide_background]').on('change', function() {
 		update_slide_background_meta_boxes();
 	});
+
+	foyer_slide_setup_scheduler();
 
 });
 

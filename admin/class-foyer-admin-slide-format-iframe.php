@@ -22,6 +22,53 @@ class Foyer_Admin_Slide_Format_Iframe {
 	static function save_slide( $post_id ) {
 		$slide_iframe_website_url = sanitize_text_field( $_POST['slide_iframe_website_url'] );
 		update_post_meta( $post_id, 'slide_iframe_website_url', $slide_iframe_website_url );
+		self::maybe_add_snapshot_allowed_host( $slide_iframe_website_url );
+	}
+
+	/**
+	 * Adds a valid iframe URL host to the Roku snapshot allowlist.
+	 *
+	 * @since	1.8.0-stirling.1
+	 *
+	 * @param string $url Submitted iframe URL.
+	 * @return void
+	 */
+	private static function maybe_add_snapshot_allowed_host( $url ) {
+		$url = trim( (string) $url );
+
+		if ( '' === $url ) {
+			return;
+		}
+
+		$url_data = Foyer_Roku_Snapshots::get_valid_url_data( $url );
+		if ( is_wp_error( $url_data ) ) {
+			Foyer_Admin_Slide::add_admin_notice(
+				'error',
+				__( 'The iframe URL host was not added to the Roku snapshot allowlist because the URL is not valid for snapshots.', 'foyer' )
+			);
+			return;
+		}
+
+		$host = $url_data['host'];
+		$settings = Foyer_Settings::get_settings();
+		$hosts = empty( $settings['webpage_snapshot_allowed_hosts'] ) ? array() : $settings['webpage_snapshot_allowed_hosts'];
+
+		if ( in_array( $host, $hosts, true ) ) {
+			return;
+		}
+
+		$hosts[] = $host;
+		$settings['webpage_snapshot_allowed_hosts'] = $hosts;
+		update_option( Foyer_Settings::option_name, Foyer_Settings::sanitize( $settings ) );
+
+		Foyer_Admin_Slide::add_admin_notice(
+			'success',
+			sprintf(
+				/* translators: %s: host name. */
+				__( 'Added %s to the Roku snapshot allowed hosts.', 'foyer' ),
+				$host
+			)
+		);
 	}
 
 	/**
